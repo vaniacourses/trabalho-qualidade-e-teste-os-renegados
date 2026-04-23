@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovoBanco Investimentos Investimentos — Sistema Bancário</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f14;
+      --surface: #111820;
+      --surface2: #1a2433;
+      --border: #1f2e40;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #e8edf2;
+      --muted: #6b8099;
+      --green: #2eb87a;
+      --red: #e05555;
+      --blue: #4a9eff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND DECORATION ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(11,15,20,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+    .logo span { color: var(--text); }
+
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-badge {
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 100px 48px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 32px;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: blink 1.4s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(42px, 5vw, 68px);
+      line-height: 1.1;
+      margin-bottom: 24px;
+      max-width: 720px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+      max-width: 560px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0b0f14;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-ghost:hover { border-color: var(--muted); transform: translateY(-1px); }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 48px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .stat-sub { font-size: 13px; color: var(--muted); }
+    .stat-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .badge-green { background: rgba(46,184,122,0.15); color: var(--green); }
+    .badge-gold { background: rgba(201,168,76,0.15); color: var(--gold); }
+
+    /* ── MODULES GRID ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 48px 100px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+    }
+    .section-sub { color: var(--muted); font-size: 14px; }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, transform 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent, var(--gold));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      transform-origin: left;
+    }
+    .module-card:hover {
+      border-color: var(--surface2);
+      background: var(--surface2);
+      transform: translateY(-3px);
+    }
+    .module-card:hover::before { transform: scaleX(1); }
+
+    .module-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .module-name {
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+    .module-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .module-endpoint {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--blue);
+      background: rgba(74,158,255,0.08);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ── PLAYGROUND ── */
+    .playground {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 48px 100px;
+    }
+
+    .playground-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .playground-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .tab-btn {
+      padding: 16px 28px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    .playground-body { padding: 32px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .form-group select,
+    .form-group input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group select:focus,
+    .form-group input:focus { border-color: var(--gold); }
+
+    .run-btn {
+      background: var(--gold);
+      color: #0b0f14;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+    .run-btn:hover { background: var(--gold-light); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-box {
+      margin-top: 24px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--green);
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .result-box.error { color: var(--red); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 48px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ── LOADING SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(11,15,20,0.3);
+      border-top-color: #0b0f14;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 24px 48px; }
+      .status-bar { padding: 0 24px; grid-template-columns: 1fr 1fr; }
+      .section { padding: 0 24px 60px; }
+      .modules-grid { grid-template-columns: 1fr; }
+      .playground { padding: 0 24px 60px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Novo<span>Banco</span></div>
+  <div class="nav-links">
+    <a href="#modulos">Módulos</a>
+    <a href="#playground">Playground</a>
+    <a href="http://localhost:5000/health" target="_blank">Health</a>
+  </div>
+  <span class="nav-badge" id="api-status">● Verificando...</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Sistema Bancário — v1.0.0</div>
+  <h1>Qualidade e<br/><em>Teste de Software</em></h1>
+  <p class="hero-sub">
+    Sistema bancário completo.
+  </p>
+  <div class="hero-actions">
+    <a href="#playground" class="btn-primary">Testar API</a>
+    <a href="#modulos" class="btn-ghost">Ver Módulos</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="status-bar">
+  <div class="stat-card">
+    <div class="stat-label">Testes</div>
+    <div class="stat-value">150</div>
+    <div class="stat-sub">unitários + integração</div>
+    <span class="stat-badge badge-green">100% passando</span>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Módulos</div>
+    <div class="stat-value">6</div>
+    <div class="stat-sub">classes de serviço</div>
+    <span class="stat-badge badge-gold">CC ≥ 10</span>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Endpoints</div>
+    <div class="stat-value">11</div>
+    <div class="stat-sub">rotas REST</div>
+    <span class="stat-badge badge-green">Flask API</span>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Cobertura</div>
+    <div class="stat-value">—</div>
+    <div class="stat-sub">rodar com --cov</div>
+    <span class="stat-badge badge-gold">pytest-cov</span>
+  </div>
+</div>
+
+<!-- MODULES -->
+<section class="section" id="modulos">
+  <div class="section-header">
+    <h2 class="section-title">Módulos do Sistema</h2>
+    <span class="section-sub">6 classes de alta complexidade</span>
+  </div>
+  <div class="modules-grid">
+    <a class="module-card" href="#playground" style="--accent:#c9a84c" onclick="setTab('emprestimo')">
+      <span class="module-icon">🏦</span>
+      <div class="module-name">LoanCalculator</div>
+      <div class="module-desc">Cálculo de empréstimos PRICE, SAC e SAM. Taxa personalizada por score e renda. Quitação antecipada.</div>
+      <span class="module-endpoint">POST /loans/simulate</span>
+    </a>
+    <a class="module-card" href="#playground" style="--accent:#4a9eff" onclick="setTab('transacao')">
+      <span class="module-icon">💸</span>
+      <div class="module-name">TransactionValidator</div>
+      <div class="module-desc">Validação de PIX, TED, DOC e transferências. Limites diários, horários e tarifas por pacote.</div>
+      <span class="module-endpoint">POST /transactions/validate</span>
+    </a>
+    <a class="module-card" href="#playground" style="--accent:#e05555" onclick="setTab('fraude')">
+      <span class="module-icon">🔍</span>
+      <div class="module-name">FraudDetector</div>
+      <div class="module-desc">8 regras de detecção: velocity, structuring, VPN, país estrangeiro, novo dispositivo, madrugada.</div>
+      <span class="module-endpoint">POST /fraud/analyze</span>
+    </a>
+    <a class="module-card" href="#playground" style="--accent:#2eb87a" onclick="setTab('score')">
+      <span class="module-icon">📊</span>
+      <div class="module-name">CreditScoreCalculator</div>
+      <div class="module-desc">Modelo estilo Serasa com 7 fatores ponderados. Score 0–1000. Simula melhorias.</div>
+      <span class="module-endpoint">POST /credit/score</span>
+    </a>
+    <a class="module-card" href="#playground" style="--accent:#a78bfa" onclick="setTab('investimento')">
+      <span class="module-icon">📈</span>
+      <div class="module-name">InvestmentCalculator</div>
+      <div class="module-desc">CDB, LCI, LCA, Poupança, Tesouro Direto. IR e IOF regressivos. Comparativo ranqueado.</div>
+      <span class="module-endpoint">POST /investments/compare</span>
+    </a>
+    <a class="module-card" href="#playground" style="--accent:#f59e0b" onclick="setTab('conta')">
+      <span class="module-icon">🏧</span>
+      <div class="module-name">AccountManager</div>
+      <div class="module-desc">Abertura, bloqueio e encerramento de contas. Limite de crédito por score. Extrato por período.</div>
+      <span class="module-endpoint">POST /accounts/open</span>
+    </a>
+  </div>
+</section>
+
+<!-- PLAYGROUND -->
+<section class="playground" id="playground">
+  <div class="section-header">
+    <h2 class="section-title">Playground</h2>
+    <span class="section-sub">Teste os endpoints diretamente</span>
+  </div>
+  <div class="playground-card">
+    <div class="playground-tabs">
+      <button class="tab-btn active" onclick="switchTab('emprestimo', this)">Empréstimo</button>
+      <button class="tab-btn" onclick="switchTab('score', this)">Score</button>
+      <button class="tab-btn" onclick="switchTab('investimento', this)">Investimento</button>
+      <button class="tab-btn" onclick="switchTab('fraude', this)">Fraude</button>
+      <button class="tab-btn" onclick="switchTab('conta', this)">Conta</button>
+    </div>
+
+    <!-- EMPRÉSTIMO -->
+    <div class="playground-body" id="tab-emprestimo">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Empréstimo</label>
+          <select id="loan-type">
+            <option value="personal">Pessoal</option>
+            <option value="mortgage">Imobiliário</option>
+            <option value="auto">Veículo</option>
+            <option value="student">Estudantil</option>
+            <option value="payroll_deductible">Consignado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sistema de Amortização</label>
+          <select id="loan-amortization">
+            <option value="price">PRICE</option>
+            <option value="sac">SAC</option>
+            <option value="sam">SAM</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" id="loan-amount" value="20000" min="100"/>
+        </div>
+        <div class="form-group">
+          <label>Prazo (meses)</label>
+          <input type="number" id="loan-term" value="24" min="1"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Score de Crédito (0–1000)</label>
+          <input type="number" id="loan-score" value="700" min="0" max="1000"/>
+        </div>
+        <div class="form-group">
+          <label>Renda Mensal (R$)</label>
+          <input type="number" id="loan-income" value="8000"/>
+        </div>
+      </div>
+      <button class="run-btn" onclick="runLoan()">▶ Simular Empréstimo</button>
+      <div class="result-box" id="result-emprestimo"></div>
+    </div>
+
+    <!-- SCORE -->
+    <div class="playground-body" id="tab-score" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pagamentos em dia</label>
+          <input type="number" id="s-ontime" value="58"/>
+        </div>
+        <div class="form-group">
+          <label>Total de pagamentos</label>
+          <input type="number" id="s-total" value="60"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Limite total (R$)</label>
+          <input type="number" id="s-limit" value="15000"/>
+        </div>
+        <div class="form-group">
+          <label>Crédito utilizado (R$)</label>
+          <input type="number" id="s-used" value="4000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Conta mais antiga (meses)</label>
+          <input type="number" id="s-age" value="72"/>
+        </div>
+        <div class="form-group">
+          <label>Pendências ativas</label>
+          <input type="number" id="s-neg" value="0"/>
+        </div>
+      </div>
+      <button class="run-btn" onclick="runScore()">▶ Calcular Score</button>
+      <div class="result-box" id="result-score"></div>
+    </div>
+
+    <!-- INVESTIMENTO -->
+    <div class="playground-body" id="tab-investimento" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valor investido (R$)</label>
+          <input type="number" id="inv-principal" value="10000"/>
+        </div>
+        <div class="form-group">
+          <label>Prazo (dias)</label>
+          <input type="number" id="inv-days" value="365"/>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Compara automaticamente: CDB 110%, LCI 92%, Poupança e Tesouro Selic.</p>
+      <button class="run-btn" onclick="runInvestimento()">▶ Comparar Investimentos</button>
+      <div class="result-box" id="result-investimento"></div>
+    </div>
+
+    <!-- FRAUDE -->
+    <div class="playground-body" id="tab-fraude" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de transação</label>
+          <select id="fraud-type">
+            <option value="pix">PIX</option>
+            <option value="transfer">Transferência</option>
+            <option value="withdrawal">Saque</option>
+            <option value="ted">TED</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" id="fraud-amount" value="500"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Renda mensal do cliente (R$)</label>
+          <input type="number" id="fraud-income" value="5000"/>
+        </div>
+        <div class="form-group">
+          <label>Conta criada há (dias)</label>
+          <input type="number" id="fraud-age" value="180"/>
+        </div>
+      </div>
+      <button class="run-btn" onclick="runFraude()">▶ Analisar Risco</button>
+      <div class="result-box" id="result-fraude"></div>
+    </div>
+
+    <!-- CONTA -->
+    <div class="playground-body" id="tab-conta" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome do cliente</label>
+          <input type="text" id="acc-name" value="João Silva"/>
+        </div>
+        <div class="form-group">
+          <label>Tipo de conta</label>
+          <select id="acc-type">
+            <option value="checking">Corrente</option>
+            <option value="savings">Poupança</option>
+            <option value="salary">Salário</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Renda mensal (R$)</label>
+          <input type="number" id="acc-income" value="5000"/>
+        </div>
+        <div class="form-group">
+          <label>Score de crédito</label>
+          <input type="number" id="acc-score" value="700"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Depósito inicial (R$)</label>
+        <input type="number" id="acc-deposit" value="500"/>
+      </div>
+      <button class="run-btn" onclick="runConta()">▶ Abrir Conta</button>
+      <div class="result-box" id="result-conta"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>NovoBanco Investimentos Investimentos Sistema Bancário · Trabalho de Qualidade e Teste de Software · API rodando em <strong>localhost:5000</strong></p>
+</footer>
+
+<script>
+  const API = 'http://localhost:5000';
+
+  // Check API health on load
+  fetch(`${API}/health`)
+    .then(r => r.json())
+    .then(() => {
+      const el = document.getElementById('api-status');
+      el.textContent = '● API Online';
+      el.style.background = '#2eb87a';
+    })
+    .catch(() => {
+      const el = document.getElementById('api-status');
+      el.textContent = '● API Offline';
+      el.style.background = '#e05555';
+    });
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.playground-body').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).style.display = 'block';
+    btn.classList.add('active');
+  }
+
+  function setTab(tab) {
+    setTimeout(() => {
+      const btns = document.querySelectorAll('.tab-btn');
+      const tabs = ['emprestimo', 'transacao', 'fraude', 'score', 'investimento', 'conta'];
+      const idx = tabs.indexOf(tab);
+      if (idx >= 0 && btns[idx]) switchTab(tab, btns[idx]);
+    }, 100);
+  }
+
+  function showResult(id, data, isError) {
+    const el = document.getElementById('result-' + id);
+    el.textContent = JSON.stringify(data, null, 2);
+    el.className = 'result-box visible' + (isError ? ' error' : '');
+  }
+
+  function setLoading(btn, loading) {
+    if (loading) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Processando...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.label;
+    }
+  }
+
+  async function post(endpoint, body) {
+    const r = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    return r.json();
+  }
+
+  async function runLoan() {
+    const btn = event.target;
+    btn.dataset.label = btn.innerHTML;
+    setLoading(btn, true);
+    try {
+      const data = await post('/loans/simulate', {
+        loan_type: document.getElementById('loan-type').value,
+        amortization_system: document.getElementById('loan-amortization').value,
+        amount: +document.getElementById('loan-amount').value,
+        term_months: +document.getElementById('loan-term').value,
+        credit_score: +document.getElementById('loan-score').value,
+        monthly_income: +document.getElementById('loan-income').value,
+        age: 35
+      });
+      // Mostra resumo amigável primeiro
+      const summary = data.valid ? {
+        "✅ Aprovado": true,
+        "Tipo": data.loan_type,
+        "Sistema": data.amortization_system,
+        "Taxa mensal": (data.monthly_rate * 100).toFixed(2) + '%',
+        "Taxa anual (CET)": (data.annual_rate * 100).toFixed(2) + '%',
+        "Total a pagar": `R$ ${data.total_amount?.toFixed(2)}`,
+        "Total de juros": `R$ ${data.total_interest?.toFixed(2)}`,
+        "Primeira parcela": data.installments?.[0] ? `R$ ${data.installments[0].total.toFixed(2)}` : '-',
+        "Parcelas": data.term_months
+      } : data;
+      showResult('emprestimo', summary, !data.valid);
+    } catch(e) {
+      showResult('emprestimo', { erro: 'Não foi possível conectar à API. Verifique se está rodando.' }, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function runScore() {
+    const btn = event.target;
+    btn.dataset.label = btn.innerHTML;
+    setLoading(btn, true);
+    try {
+      const data = await post('/credit/score', {
+        payment_history: {
+          total_payments: +document.getElementById('s-total').value,
+          on_time: +document.getElementById('s-ontime').value,
+          late_30_days: 0, late_60_days: 0, late_90_plus_days: 0, defaults: 0
+        },
+        debt_info: {
+          total_credit_limit: +document.getElementById('s-limit').value,
+          total_used: +document.getElementById('s-used').value
+        },
+        credit_history: {
+          oldest_account_months: +document.getElementById('s-age').value,
+          average_account_age_months: Math.round(+document.getElementById('s-age').value * 0.7)
+        },
+        credit_mix: { credit_card: true, personal_loan: false, mortgage: false, auto_loan: false, payroll_deductible: false },
+        inquiries: { last_12_months: 2, last_3_months: 0 },
+        income_info: { employment_years: 3, income_type: 'clt', monthly_variation_pct: 5 },
+        negative_records: { active_negatives: +document.getElementById('s-neg').value, total_negative_value: 0 }
+      });
+      showResult('score', {
+        "Score": data.score,
+        "Classificação": data.classification,
+        "Fatores analisados": data.factors?.length
+      }, false);
+    } catch(e) {
+      showResult('score', { erro: 'Não foi possível conectar à API.' }, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function runInvestimento() {
+    const btn = event.target;
+    btn.dataset.label = btn.innerHTML;
+    setLoading(btn, true);
+    try {
+      const data = await post('/investments/compare', {
+        principal: +document.getElementById('inv-principal').value,
+        days: +document.getElementById('inv-days').value,
+        options: [
+          { type: 'cdb', cdi_pct: 110, label: 'CDB 110% CDI' },
+          { type: 'lci', cdi_pct: 92, label: 'LCI 92% CDI' },
+          { type: 'poupanca', label: 'Poupança' },
+          { type: 'tesouro_selic', label: 'Tesouro Selic' }
+        ]
+      });
+      const ranked = data.results?.map(r => ({
+        [`#${r.rank} ${r.label || r.investment_type}`]: {
+          'Rendimento líquido': `R$ ${r.net_yield?.toFixed(2)}`,
+          'Montante final': `R$ ${r.net_amount?.toFixed(2)}`,
+          'IR': r.ir_rate ? `${(r.ir_rate*100).toFixed(1)}%` : 'Isento',
+        }
+      }));
+      showResult('investimento', ranked, false);
+    } catch(e) {
+      showResult('investimento', { erro: 'Não foi possível conectar à API.' }, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function runFraude() {
+    const btn = event.target;
+    btn.dataset.label = btn.innerHTML;
+    setLoading(btn, true);
+    try {
+      const daysAgo = +document.getElementById('fraud-age').value;
+      const createdAt = new Date(Date.now() - daysAgo * 86400000).toISOString();
+      const data = await post('/fraud/analyze', {
+        source_account_id: 'ACC-TEST-001',
+        transaction_type: document.getElementById('fraud-type').value,
+        amount: +document.getElementById('fraud-amount').value,
+        customer_profile: {
+          monthly_income: +document.getElementById('fraud-income').value,
+          account_created_at: createdAt
+        }
+      });
+      const icons = { approve: '✅', review: '⚠️', block: '🚫' };
+      showResult('fraude', {
+        [`${icons[data.decision] || ''} Decisão`]: data.decision?.toUpperCase(),
+        'Score de risco': data.risk_score,
+        'Alertas disparados': data.alerts_count,
+        'Alertas': data.alerts?.map(a => `[${a.risk_level.toUpperCase()}] ${a.rule}: ${a.description}`)
+      }, data.decision === 'block');
+    } catch(e) {
+      showResult('fraude', { erro: 'Não foi possível conectar à API.' }, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function runConta() {
+    const btn = event.target;
+    btn.dataset.label = btn.innerHTML;
+    setLoading(btn, true);
+    try {
+      const data = await post('/accounts/open', {
+        account_type: document.getElementById('acc-type').value,
+        initial_deposit: +document.getElementById('acc-deposit').value,
+        customer: {
+          customer_id: 'CUST-' + Date.now(),
+          name: document.getElementById('acc-name').value,
+          cpf: '000.000.000-00',
+          email: 'cliente@email.com',
+          phone: '21999999999',
+          birth_date: '1990-01-01',
+          monthly_income: +document.getElementById('acc-income').value,
+          credit_score: +document.getElementById('acc-score').value,
+          status: 'active'
+        }
+      });
+      showResult('conta', {
+        '✅ Conta aberta': true,
+        'ID': data.account?.account_id,
+        'Tipo': data.account?.account_type,
+        'Saldo inicial': `R$ ${data.account?.balance?.toFixed(2)}`,
+        'Limite de crédito': `R$ ${data.account?.credit_limit?.toFixed(2)}`,
+        'Status': data.account?.status,
+        'Avisos': data.warnings?.length ? data.warnings : 'Nenhum'
+      }, false);
+    } catch(e) {
+      showResult('conta', { erro: 'Não foi possível conectar à API.' }, true);
+    }
+    setLoading(btn, false);
+  }
+</script>
+</body>
+</html>

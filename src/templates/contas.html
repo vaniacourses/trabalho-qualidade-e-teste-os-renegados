@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Contas — NovoBanco Investimentos Investimentos{% endblock %}
+{% block page_title %}Abertura de Conta{% endblock %}
+{% block page_subtitle %}Simule a abertura e o perfil de crédito da conta{% endblock %}
+
+{% block content %}
+<div style="display:grid; grid-template-columns: 380px 1fr; gap:24px; align-items:start;">
+
+  <!-- FORM -->
+  <div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">🏧 Dados da Conta</div>
+      <div class="form-group">
+        <label>Tipo de Conta</label>
+        <select id="acc-type">
+          <option value="checking">Conta Corrente</option>
+          <option value="savings">Conta Poupança</option>
+          <option value="salary">Conta Salário</option>
+          <option value="investment">Conta Investimento</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Depósito Inicial (R$)</label>
+        <input type="number" id="acc-deposit" value="500" min="0"/>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">👤 Dados do Titular</div>
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="acc-name" value="João Silva"/>
+      </div>
+      <div class="form-group">
+        <label>Data de Nascimento</label>
+        <input type="date" id="acc-birth" value="1990-01-01"/>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Renda Mensal (R$)</label>
+          <input type="number" id="acc-income" value="5000"/>
+        </div>
+        <div class="form-group">
+          <label>Score de Crédito</label>
+          <input type="number" id="acc-score" value="700" min="0" max="1000"/>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-gold" style="width:100%" id="btn-conta" onclick="abrirConta()">
+      Simular Abertura de Conta
+    </button>
+
+    <hr class="divider"/>
+
+    <!-- Score section -->
+    <div class="card">
+      <div class="card-title">📊 Calcular Score de Crédito</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Insira o histórico financeiro para calcular o score.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Pagamentos em dia</label>
+          <input type="number" id="sc-ontime" value="58"/>
+        </div>
+        <div class="form-group">
+          <label>Total de pagamentos</label>
+          <input type="number" id="sc-total" value="60"/>
+        </div>
+        <div class="form-group">
+          <label>Limite total (R$)</label>
+          <input type="number" id="sc-limit" value="15000"/>
+        </div>
+        <div class="form-group">
+          <label>Crédito usado (R$)</label>
+          <input type="number" id="sc-used" value="4000"/>
+        </div>
+        <div class="form-group">
+          <label>Conta mais antiga (meses)</label>
+          <input type="number" id="sc-age" value="72"/>
+        </div>
+        <div class="form-group">
+          <label>Pendências ativas</label>
+          <input type="number" id="sc-neg" value="0"/>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:12px" id="btn-score" onclick="calcularScore()">
+        Calcular Score
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div>
+    <div id="conta-result" style="display:none;" class="card" style="margin-bottom:20px;">
+      <div class="card-title">✅ Conta Simulada com Sucesso</div>
+      <div class="result-grid" id="conta-grid" style="margin-bottom:16px;"></div>
+      <div id="conta-warnings" style="display:none;">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Avisos</div>
+        <div id="conta-warnings-list"></div>
+      </div>
+    </div>
+
+    <div id="conta-error" style="display:none;" class="card">
+      <div class="card-title" style="color:var(--red)">⚠ Abertura não permitida</div>
+      <div id="conta-error-msg" style="color:var(--muted);font-size:14px;"></div>
+    </div>
+
+    <div id="score-result" style="display:none;" class="card" style="margin-top:20px;">
+      <div class="card-title">📊 Resultado do Score</div>
+      <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
+        <div id="score-gauge" style="width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;border:4px solid var(--gold);">
+          <div id="score-value" style="font-size:26px;font-weight:700;color:var(--gold);"></div>
+          <div style="font-size:10px;color:var(--muted);">/ 1000</div>
+        </div>
+        <div>
+          <div id="score-class" style="font-size:18px;font-weight:600;margin-bottom:4px;"></div>
+          <div id="score-desc" style="font-size:13px;color:var(--muted);"></div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:10px;">Fatores analisados</div>
+      <div id="score-factors" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div id="acc-placeholder" class="card" style="display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--muted);font-size:14px;">
+      Preencha os dados e clique em "Simular" para ver o resultado.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function abrirConta() {
+  const btn = document.getElementById('btn-conta');
+  const label = btn.innerHTML;
+  setLoading(btn, true, label);
+
+  const data = await post('/accounts/open', {
+    account_type: document.getElementById('acc-type').value,
+    initial_deposit: +document.getElementById('acc-deposit').value,
+    customer: {
+      customer_id: 'CUST-' + Date.now(),
+      name: document.getElementById('acc-name').value,
+      cpf: '000.000.000-00',
+      email: 'cliente@NovoBanco Investimentos.com.br',
+      phone: '21999999999',
+      birth_date: document.getElementById('acc-birth').value,
+      monthly_income: +document.getElementById('acc-income').value,
+      credit_score: +document.getElementById('acc-score').value,
+      status: 'active',
+    }
+  });
+
+  setLoading(btn, false, label);
+  document.getElementById('acc-placeholder').style.display = 'none';
+  document.getElementById('conta-result').style.display = 'none';
+  document.getElementById('conta-error').style.display = 'none';
+
+  if (data.error) {
+    document.getElementById('conta-error').style.display = 'block';
+    document.getElementById('conta-error-msg').textContent = data.error;
+    return;
+  }
+
+  document.getElementById('conta-result').style.display = 'block';
+  const acc = data.account;
+  const typeLabels = { checking:'Conta Corrente', savings:'Conta Poupança', salary:'Conta Salário', investment:'Conta Investimento' };
+  document.getElementById('conta-grid').innerHTML = `
+    <div class="result-item"><div class="result-item-label">ID da Conta</div><div class="result-item-value" style="font-size:12px;font-family:monospace;">${acc.account_id}</div></div>
+    <div class="result-item"><div class="result-item-label">Tipo</div><div class="result-item-value" style="font-size:16px;">${typeLabels[acc.account_type]||acc.account_type}</div></div>
+    <div class="result-item"><div class="result-item-label">Saldo Inicial</div><div class="result-item-value green">${fmtBRL(acc.balance)}</div></div>
+    <div class="result-item"><div class="result-item-label">Limite de Crédito</div><div class="result-item-value gold">${fmtBRL(acc.credit_limit)}</div></div>
+    <div class="result-item"><div class="result-item-label">Disponível</div><div class="result-item-value">${fmtBRL(acc.available_balance)}</div></div>
+    <div class="result-item"><div class="result-item-label">Status</div><div class="result-item-value green" style="font-size:14px;">✓ ATIVA</div></div>
+  `;
+
+  const w = document.getElementById('conta-warnings');
+  if (data.warnings && data.warnings.length > 0) {
+    w.style.display = 'block';
+    document.getElementById('conta-warnings-list').innerHTML = data.warnings.map(
+      w => `<div class="alert alert-warning">⚠ ${w}</div>`
+    ).join('');
+  } else {
+    w.style.display = 'none';
+  }
+}
+
+const factorLabels = {
+  payment_history: 'Histórico de Pagamentos',
+  debt_utilization: 'Utilização de Crédito',
+  credit_age: 'Idade do Crédito',
+  credit_mix: 'Mix de Produtos',
+  new_credit: 'Novas Consultas',
+  income_stability: 'Estabilidade de Renda',
+  negative_records: 'Registros Negativos',
+};
+
+async function calcularScore() {
+  const btn = document.getElementById('btn-score');
+  const label = btn.innerHTML;
+  setLoading(btn, true, label);
+
+  const ontime = +document.getElementById('sc-ontime').value;
+  const total = +document.getElementById('sc-total').value;
+  const data = await post('/credit/score', {
+    payment_history: { total_payments: total, on_time: ontime, late_30_days: 0, late_60_days: 0, late_90_plus_days: 0, defaults: 0 },
+    debt_info: { total_credit_limit: +document.getElementById('sc-limit').value, total_used: +document.getElementById('sc-used').value },
+    credit_history: { oldest_account_months: +document.getElementById('sc-age').value, average_account_age_months: Math.round(+document.getElementById('sc-age').value * 0.7) },
+    credit_mix: { credit_card: true, personal_loan: false, mortgage: false, auto_loan: false, payroll_deductible: false },
+    inquiries: { last_12_months: 2, last_3_months: 0 },
+    income_info: { employment_years: 3, income_type: 'clt', monthly_variation_pct: 10 },
+    negative_records: { active_negatives: +document.getElementById('sc-neg').value, total_negative_value: 0, oldest_negative_months: 0 },
+  });
+
+  setLoading(btn, false, label);
+  document.getElementById('acc-placeholder').style.display = 'none';
+  document.getElementById('score-result').style.display = 'block';
+
+  const score = data.score;
+  const color = score >= 800 ? 'var(--green)' : score >= 600 ? 'var(--gold)' : 'var(--red)';
+  document.getElementById('score-gauge').style.borderColor = color;
+  document.getElementById('score-value').style.color = color;
+  document.getElementById('score-value').textContent = score;
+  document.getElementById('score-class').textContent = data.classification;
+
+  document.getElementById('score-factors').innerHTML = data.factors.map(f => {
+    const pct = f.score / 10;
+    const c = f.score >= 800 ? 'var(--green)' : f.score >= 600 ? 'var(--gold)' : 'var(--red)';
+    return `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:160px;font-size:12px;color:var(--muted);">${factorLabels[f.name]||f.name}</div>
+        <div style="flex:1;background:var(--bg);border-radius:4px;height:6px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${c};border-radius:4px;transition:width .5s;"></div>
+        </div>
+        <div style="width:40px;text-align:right;font-size:13px;font-weight:600;color:${c};">${f.score}</div>
+      </div>
+    `;
+  }).join('');
+}
+</script>
+{% endblock %}

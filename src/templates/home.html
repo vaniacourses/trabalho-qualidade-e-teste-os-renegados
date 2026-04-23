@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Início — NovoBanco Investimentos Investimentos{% endblock %}
+{% block page_title %}Painel Principal{% endblock %}
+{% block page_subtitle %}Bem-vindo, {{ session.nome.split()[0] }}{% endblock %}
+
+{% block content %}
+<div style="display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-bottom:32px;">
+  <div class="card" style="border-left:3px solid var(--gold)">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Empréstimos</div>
+    <div style="font-size:28px;font-weight:600;">3 tipos</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">Pessoal, Imobiliário, Veículo</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--green)">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Investimentos</div>
+    <div style="font-size:28px;font-weight:600;">5 produtos</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">CDB, LCI, LCA, Poupança, Tesouro</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--blue)">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Tipos de Conta</div>
+    <div style="font-size:28px;font-weight:600;">4 tipos</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">Corrente, Poupança, Salário, Invest.</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--red)">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Análise de Risco</div>
+    <div style="font-size:28px;font-weight:600;">8 regras</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">Detecção de fraudes em tempo real</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+  <div class="card">
+    <div class="card-title">Acesso Rápido</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <a href="/emprestimos" style="text-decoration:none;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px;margin-bottom:10px;">🏦</div>
+          <div style="font-weight:600;margin-bottom:4px;">Simular Empréstimo</div>
+          <div style="font-size:13px;color:var(--muted);">PRICE, SAC e SAM</div>
+        </div>
+      </a>
+      <a href="/investimentos" style="text-decoration:none;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px;margin-bottom:10px;">📈</div>
+          <div style="font-weight:600;margin-bottom:4px;">Comparar Investimentos</div>
+          <div style="font-size:13px;color:var(--muted);">Renda fixa e Tesouro</div>
+        </div>
+      </a>
+      <a href="/contas" style="text-decoration:none;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px;margin-bottom:10px;">🏧</div>
+          <div style="font-weight:600;margin-bottom:4px;">Abertura de Conta</div>
+          <div style="font-size:13px;color:var(--muted);">Simule limite e perfil</div>
+        </div>
+      </a>
+      <a href="/risco" style="text-decoration:none;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px;margin-bottom:10px;">🔍</div>
+          <div style="font-weight:600;margin-bottom:4px;">Análise de Risco</div>
+          <div style="font-size:13px;color:var(--muted);">Score e detecção de fraude</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Informações da Sessão</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Usuário</div>
+        <div style="font-weight:500;">{{ session.nome }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Login</div>
+        <div style="font-family:monospace;font-size:13px;color:var(--gold);">{{ session.username }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Perfil</div>
+        {% if session.perfil == 'admin' %}
+        <span class="badge-admin">ADMINISTRADOR</span>
+        {% else %}
+        <span style="font-size:13px;">Usuário Padrão</span>
+        {% endif %}
+      </div>
+      <hr class="divider" style="margin:4px 0"/>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Status da API</div>
+        <span id="api-status" style="font-size:13px;color:var(--muted);">Verificando...</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  fetch('/health')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('api-status').innerHTML =
+        '<span style="color:var(--green)">● Online — ' + d.version + '</span>';
+    })
+    .catch(() => {
+      document.getElementById('api-status').innerHTML =
+        '<span style="color:var(--red)">● Erro de conexão</span>';
+    });
+</script>
+{% endblock %}

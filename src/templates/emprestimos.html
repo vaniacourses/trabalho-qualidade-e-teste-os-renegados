@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Empréstimos — NovoBanco Investimentos Investimentos{% endblock %}
+{% block page_title %}Simulação de Empréstimo{% endblock %}
+{% block page_subtitle %}Calcule parcelas e taxas para diferentes perfis{% endblock %}
+
+{% block content %}
+<div style="display:grid; grid-template-columns: 380px 1fr; gap:24px; align-items:start;">
+
+  <!-- FORM -->
+  <div class="card">
+    <div class="card-title">🏦 Parâmetros</div>
+    <div class="form-group">
+      <label>Tipo de Empréstimo</label>
+      <select id="loan-type">
+        <option value="personal">Empréstimo Pessoal</option>
+        <option value="mortgage">Financiamento Imobiliário</option>
+        <option value="auto">Financiamento de Veículo</option>
+        <option value="student">Crédito Estudantil</option>
+        <option value="payroll_deductible">Crédito Consignado</option>
+        <option value="business">Crédito Empresarial</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Sistema de Amortização</label>
+      <select id="loan-amort">
+        <option value="price">Tabela PRICE — Parcelas iguais</option>
+        <option value="sac">SAC — Amortização constante</option>
+        <option value="sam">SAM — Misto (PRICE + SAC)</option>
+      </select>
+    </div>
+    <hr class="divider"/>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Valor Solicitado (R$)</label>
+        <input type="number" id="loan-amount" value="20000" min="100"/>
+      </div>
+      <div class="form-group">
+        <label>Prazo (meses)</label>
+        <input type="number" id="loan-term" value="24" min="1"/>
+      </div>
+      <div class="form-group">
+        <label>Renda Mensal (R$)</label>
+        <input type="number" id="loan-income" value="8000" min="1"/>
+      </div>
+      <div class="form-group">
+        <label>Score de Crédito (0–1000)</label>
+        <input type="number" id="loan-score" value="700" min="0" max="1000"/>
+      </div>
+      <div class="form-group">
+        <label>Idade</label>
+        <input type="number" id="loan-age" value="35" min="18"/>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <button class="btn btn-gold" style="width:100%" id="btn-loan" onclick="simularEmprestimo()">
+      Simular Empréstimo
+    </button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="result-area" class="result-area">
+    <!-- Resumo -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">📋 Resumo</div>
+      <div class="result-grid" id="resumo-grid"></div>
+    </div>
+
+    <!-- Tabela de parcelas -->
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span>📅 Tabela de Parcelas</span>
+        <span id="parcelas-count" style="font-size:13px;color:var(--muted);font-weight:400;"></span>
+      </div>
+      <div style="overflow-x:auto;max-height:420px;overflow-y:auto;">
+        <table class="result-table" id="parcelas-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Vencimento</th>
+              <th>Amortização</th>
+              <th>Juros</th>
+              <th>Prestação</th>
+            </tr>
+          </thead>
+          <tbody id="parcelas-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Alerta de erros -->
+    <div id="loan-errors" style="display:none;" class="card">
+      <div class="card-title" style="color:var(--red)">⚠ Solicitação não aprovada</div>
+      <ul id="loan-errors-list" style="padding-left:20px;color:var(--muted);font-size:14px;line-height:1.8;"></ul>
+    </div>
+  </div>
+
+  <div id="placeholder" class="card" style="display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--muted);font-size:14px;">
+    Preencha os parâmetros e clique em "Simular" para ver o resultado.
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function simularEmprestimo() {
+  const btn = document.getElementById('btn-loan');
+  const label = btn.innerHTML;
+  setLoading(btn, true, label);
+
+  const body = {
+    loan_type: document.getElementById('loan-type').value,
+    amortization_system: document.getElementById('loan-amort').value,
+    amount: +document.getElementById('loan-amount').value,
+    term_months: +document.getElementById('loan-term').value,
+    monthly_income: +document.getElementById('loan-income').value,
+    credit_score: +document.getElementById('loan-score').value,
+    age: +document.getElementById('loan-age').value,
+  };
+
+  const data = await post('/loans/simulate', body);
+  setLoading(btn, false, label);
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('result-area').classList.add('visible');
+  document.getElementById('loan-errors').style.display = 'none';
+
+  if (!data.valid) {
+    document.getElementById('result-area').classList.remove('visible');
+    const errDiv = document.getElementById('loan-errors');
+    errDiv.style.display = 'block';
+    const list = document.getElementById('loan-errors-list');
+    list.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+    return;
+  }
+
+  // Resumo
+  document.getElementById('resumo-grid').innerHTML = `
+    <div class="result-item"><div class="result-item-label">Taxa Mensal</div><div class="result-item-value gold">${fmtPct(data.monthly_rate)}</div></div>
+    <div class="result-item"><div class="result-item-label">Taxa Anual (CET)</div><div class="result-item-value gold">${fmtPct(data.annual_rate)}</div></div>
+    <div class="result-item"><div class="result-item-label">Total a Pagar</div><div class="result-item-value">${fmtBRL(data.total_amount)}</div></div>
+    <div class="result-item"><div class="result-item-label">Total de Juros</div><div class="result-item-value red">${fmtBRL(data.total_interest)}</div></div>
+    <div class="result-item"><div class="result-item-label">1ª Parcela</div><div class="result-item-value green">${fmtBRL(data.installments[0].total)}</div></div>
+    <div class="result-item"><div class="result-item-label">Última Parcela</div><div class="result-item-value">${fmtBRL(data.installments[data.installments.length-1].total)}</div></div>
+  `;
+
+  // Parcelas
+  document.getElementById('parcelas-count').textContent = data.term_months + ' parcelas';
+  const tbody = document.getElementById('parcelas-body');
+  tbody.innerHTML = data.installments.map(i => `
+    <tr>
+      <td style="color:var(--muted)">${i.installment_number}</td>
+      <td>${i.due_date}</td>
+      <td>${fmtBRL(i.principal)}</td>
+      <td style="color:var(--red)">${fmtBRL(i.interest)}</td>
+      <td style="font-weight:600;color:var(--gold)">${fmtBRL(i.total)}</td>
+    </tr>
+  `).join('');
+}
+</script>
+{% endblock %}
