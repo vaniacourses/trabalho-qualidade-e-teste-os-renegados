@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5bf640d7-4ecd-4765-8ba8-ef51e9a4ecbb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/Sistema_Bancario_POO.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/description.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__com_google_code_gson_gson_2_8_9.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__com_googlecode_json_simple_json_simple_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__com_konghq_unirest_java_3_13_7.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__commons_codec_commons_codec_1_15.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_httpcomponents_httpasyncclient_4_1_5.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_httpcomponents_httpclient_4_5_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_httpcomponents_httpcore_4_4_15.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_httpcomponents_httpcore_nio_4_4_15.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_httpcomponents_httpmime_4_5_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_apache_maven_maven_artifact_2_0_9.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/libraries/Maven__org_codehaus_plexus_plexus_utils_1_5_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/project-template.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/banco.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/mesAtual.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/BankAccountIsNotCurrentAccountException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/BankAccountIsNotSavingsAccountException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/BankAccountNotFoundException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/ClientFoundIsNotClientWinxException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/ClientNotFoundException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/NotEnaughPurchasePoints.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/ValueIsHigherThanBalanceException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/exception/YouAreNotLoggedInException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/geradordedocumentos/ArquivoExtrato.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/geradordedocumentos/ArquivoInformeRendimento.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/random/RandomNumberGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/repository/ArquivoBanco.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/repository/ArquivoDeClientes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/repository/ArquivoDeMesAtual.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/Banco.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/Cartao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/CartaoCredito.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/Conta.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/ContaCorrente.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/ContaPoupanca.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/Movimentacao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemabancario/OperacoesAutomaticas.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemaclientes/Cliente.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/sistemaclientes/ClienteWinx.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/src/main/java/br/winxbank/tempo/Ano.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/Main.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/BankAccountIsNotCurrentAccountException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/BankAccountIsNotSavingsAccountException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/BankAccountNotFoundException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/ClientFoundIsNotClientWinxException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/ClientNotFoundException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/NotEnaughPurchasePoints.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/ValueIsHigherThanBalanceException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/exception/YouAreNotLoggedInException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/geradordedocumentos/ArquivoExtrato.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/geradordedocumentos/ArquivoInformeRendimento.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/random/RandomNumberGenerator.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/repository/ArquivoBanco.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/repository/ArquivoDeClientes.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/repository/ArquivoDeMesAtual.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/Banco.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/Cartao.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/CartaoCredito.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/Conta.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/ContaCorrente.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/ContaPoupanca.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/Movimentacao$TipoDaMovimentacao.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/Movimentacao.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemabancario/OperacoesAutomaticas.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemaclientes/Cliente.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/sistemaclientes/ClienteWinx.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/target/classes/br/winxbank/tempo/Ano.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/winxbank/winxbank.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/routes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/conftest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/db.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/novobanco.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/account.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/customer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/loan.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/transaction.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pytest.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/account_manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/credit_score_calculator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/fraud_detector.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/investment_calculator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/loan_calculator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/transaction_validator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/admin.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/base.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/contas.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/emprestimos.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/home.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/investimentos.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/login.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/templates/risco.html" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="3CmQs8STNhvTgbhh85kyqlR0Y4r" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "JUnit.RegistroDeClientesTest.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Murilo/PyCharmMiscProject/trabalho-qualidade-e-teste-os-renegados",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Murilo\PyCharmMiscProject\trabalho-qualidade-e-teste-os-renegados\winxbank\src\test\java" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Murilo\PyCharmMiscProject\trabalho-qualidade-e-teste-os-renegados\winxbank\src\main\java" />
+      <recent name="C:\Users\Murilo\PyCharmMiscProject\trabalho-qualidade-e-teste-os-renegados" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Main">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="br.winxbank.Main" />
+      <module name="winxbank" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="br.winxbank.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RegistroDeClientesTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="winxbank" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="br.winxbank.sistemaclientes.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="br.winxbank.sistemaclientes" />
+      <option name="MAIN_CLASS_NAME" value="br.winxbank.sistemaclientes.RegistroDeClientesTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Main" />
+        <item itemvalue="JUnit.RegistroDeClientesTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-b63d5a1f7c97-b61e75351b1f-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.22158.340" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5bf640d7-4ecd-4765-8ba8-ef51e9a4ecbb" name="Changes" comment="" />
+      <created>1776988470232</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776988470232</updated>
+      <workItem from="1776988472369" duration="1798000" />
+      <workItem from="1776994933236" duration="2205000" />
+      <workItem from="1777072954189" duration="922000" />
+      <workItem from="1777073906696" duration="609000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
