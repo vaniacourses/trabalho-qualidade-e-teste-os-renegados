@@ -1,12 +1,15 @@
 package br.winxbank.sistemabancario;
 
 import br.winxbank.exception.BankAccountNotFoundException;
+import br.winxbank.random.RandomNumberGenerator;
 import br.winxbank.sistemaclientes.Cliente;
 import br.winxbank.sistemaclientes.RegistroDeClientes;
 import br.winxbank.tempo.Ano;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +18,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -23,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +49,7 @@ class BancoTest {
         saidaCapturada = new ByteArrayOutputStream();
         System.setOut(new PrintStream(saidaCapturada, true, StandardCharsets.UTF_8));
         limparEstadoCompartilhado();
-        Ano.getInstancia().setMesAtual("Janeiro");
+        Ano.getInstancia().setMesAtual("Abril");
     }
 
     @AfterEach
@@ -51,65 +57,97 @@ class BancoTest {
         System.setIn(systemInOriginal);
         System.setOut(systemOutOriginal);
         limparEstadoCompartilhado();
-        Ano.getInstancia().setMesAtual("Janeiro");
+        Ano.getInstancia().setMesAtual("Abril");
     }
 
     // Verifica que a abertura de conta corrente com entrada valida cria a conta,
     // preserva o saldo informado e gera numeros dentro dos intervalos esperados.
     @Test
     void abrirNovaContaQuandoEntradaEhUmCriaContaCorrenteComDadosEsperados() {
-        configurarEntrada("1\n250,75\n");
+        try (MockedConstruction<Scanner> scannerMock = mockConstruction(Scanner.class,
+                (mock, context) -> {
+                    when(mock.nextInt()).thenReturn(1);
+                    when(mock.nextDouble()).thenReturn(250.75);
+                });
+             MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            randomMock.when(RandomNumberGenerator::gerarNumCartao).thenReturn(1234);
+            randomMock.when(RandomNumberGenerator::gerarCsv).thenReturn(456);
+            randomMock.when(RandomNumberGenerator::gerarNumConta).thenReturn(54321);
 
-        Conta conta = Banco.getInstancia().abrirNovaConta();
+            Conta conta = Banco.getInstancia().abrirNovaConta();
 
-        ContaCorrente contaCorrente = assertInstanceOf(ContaCorrente.class, conta);
-        assertEquals(250.75, contaCorrente.getSaldo(), DELTA);
-        assertEquals(0.0, contaCorrente.getDividaDeEmprestimo(), DELTA);
-        assertTrue(contaCorrente.getNumeroConta() >= 10000 && contaCorrente.getNumeroConta() < 100000);
-        assertTrue(contaCorrente.getCartao().getNumero() >= 1000 && contaCorrente.getCartao().getNumero() < 10000);
-        assertTrue(contaCorrente.getCartao().getCsv() >= 100 && contaCorrente.getCartao().getCsv() < 1000);
-        assertEquals(contaCorrente.getCartao().getNumero(), contaCorrente.getCartaoCredito().getNumero());
-        assertEquals(contaCorrente.getCartao().getCsv(), contaCorrente.getCartaoCredito().getCsv());
+            ContaCorrente contaCorrente = assertInstanceOf(ContaCorrente.class, conta);
+            assertEquals(250.75, contaCorrente.getSaldo(), DELTA);
+            assertEquals(0.0, contaCorrente.getDividaDeEmprestimo(), DELTA);
+            assertEquals(54321, contaCorrente.getNumeroConta());
+            assertEquals(1234, contaCorrente.getCartao().getNumero());
+            assertEquals(456, contaCorrente.getCartao().getCsv());
+            assertEquals(1234, contaCorrente.getCartaoCredito().getNumero());
+            assertEquals(456, contaCorrente.getCartaoCredito().getCsv());
+        }
     }
 
     // Verifica que a abertura de conta corrente aceita saldo negativo,
     // expondo a ausencia de validacao para esse caso de borda.
     @Test
     void abrirNovaContaQuandoEntradaEhUmMantemSaldoNegativoSemValidacao() {
-        configurarEntrada("1\n-25,0\n");
+        try (MockedConstruction<Scanner> scannerMock = mockConstruction(Scanner.class,
+                (mock, context) -> {
+                    when(mock.nextInt()).thenReturn(1);
+                    when(mock.nextDouble()).thenReturn(-25.0);
+                });
+             MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            randomMock.when(RandomNumberGenerator::gerarNumCartao).thenReturn(1111);
+            randomMock.when(RandomNumberGenerator::gerarCsv).thenReturn(222);
+            randomMock.when(RandomNumberGenerator::gerarNumConta).thenReturn(33333);
 
-        Conta conta = Banco.getInstancia().abrirNovaConta();
+            Conta conta = Banco.getInstancia().abrirNovaConta();
 
-        ContaCorrente contaCorrente = assertInstanceOf(ContaCorrente.class, conta);
-        assertEquals(-25.0, contaCorrente.getSaldo(), DELTA);
-        assertEquals(0.0, contaCorrente.getDividaDeEmprestimo(), DELTA);
+            ContaCorrente contaCorrente = assertInstanceOf(ContaCorrente.class, conta);
+            assertEquals(-25.0, contaCorrente.getSaldo(), DELTA);
+            assertEquals(0.0, contaCorrente.getDividaDeEmprestimo(), DELTA);
+            assertEquals(33333, contaCorrente.getNumeroConta());
+        }
     }
 
     // Verifica que a abertura de conta poupanca com entrada valida cria a conta,
     // preserva o saldo negativo informado e gera identificadores esperados.
     @Test
     void abrirNovaContaQuandoEntradaEhDoisCriaContaPoupancaEMantemSaldoNegativo() {
-        configurarEntrada("2\n-50,0\n");
+        try (MockedConstruction<Scanner> scannerMock = mockConstruction(Scanner.class,
+                (mock, context) -> {
+                    when(mock.nextInt()).thenReturn(2);
+                    when(mock.nextDouble()).thenReturn(-50.0);
+                });
+             MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            randomMock.when(RandomNumberGenerator::gerarNumCartao).thenReturn(4444);
+            randomMock.when(RandomNumberGenerator::gerarCsv).thenReturn(555);
+            randomMock.when(RandomNumberGenerator::gerarNumConta).thenReturn(66666);
 
-        Conta conta = Banco.getInstancia().abrirNovaConta();
+            Conta conta = Banco.getInstancia().abrirNovaConta();
 
-        ContaPoupanca contaPoupanca = assertInstanceOf(ContaPoupanca.class, conta);
-        assertEquals(-50.0, contaPoupanca.getSaldo(), DELTA);
-        assertEquals(0.0, contaPoupanca.getDividaDeEmprestimo(), DELTA);
-        assertTrue(contaPoupanca.getNumeroConta() >= 10000 && contaPoupanca.getNumeroConta() < 100000);
-        assertTrue(contaPoupanca.getCartao().getNumero() >= 1000 && contaPoupanca.getCartao().getNumero() < 10000);
-        assertTrue(contaPoupanca.getCartao().getCsv() >= 100 && contaPoupanca.getCartao().getCsv() < 1000);
+            ContaPoupanca contaPoupanca = assertInstanceOf(ContaPoupanca.class, conta);
+            assertEquals(-50.0, contaPoupanca.getSaldo(), DELTA);
+            assertEquals(0.0, contaPoupanca.getDividaDeEmprestimo(), DELTA);
+            assertEquals(66666, contaPoupanca.getNumeroConta());
+            assertEquals(4444, contaPoupanca.getCartao().getNumero());
+            assertEquals(555, contaPoupanca.getCartao().getCsv());
+        }
     }
 
     // Verifica que uma opcao de tipo de conta fora do fluxo previsto
     // faz o metodo retornar null em vez de criar uma conta.
     @Test
     void abrirNovaContaQuandoEntradaEhInvalidaRetornaNull() {
-        configurarEntrada("9\n");
+        try (MockedConstruction<Scanner> scannerMock = mockConstruction(Scanner.class,
+                (mock, context) -> when(mock.nextInt()).thenReturn(9));
+             MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            Conta conta = Banco.getInstancia().abrirNovaConta();
 
-        Conta conta = Banco.getInstancia().abrirNovaConta();
-
-        assertNull(conta);
+            assertNull(conta);
+            verify(scannerMock.constructed().get(0)).nextInt();
+            randomMock.verifyNoInteractions();
+        }
     }
 
     // Verifica que o banco consulta a conta pelo numero digitado
