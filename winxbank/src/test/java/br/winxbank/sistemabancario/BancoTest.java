@@ -58,7 +58,7 @@ class BancoTest {
     // preserva o saldo informado e gera numeros dentro dos intervalos esperados.
     @Test
     void abrirNovaContaQuandoEntradaEhUmCriaContaCorrenteComDadosEsperados() {
-        configurarEntrada("1\n250.75\n");
+        configurarEntrada("1\n250,75\n");
 
         Conta conta = Banco.getInstancia().abrirNovaConta();
 
@@ -76,7 +76,7 @@ class BancoTest {
     // expondo a ausencia de validacao para esse caso de borda.
     @Test
     void abrirNovaContaQuandoEntradaEhUmMantemSaldoNegativoSemValidacao() {
-        configurarEntrada("1\n-25.0\n");
+        configurarEntrada("1\n-25,0\n");
 
         Conta conta = Banco.getInstancia().abrirNovaConta();
 
@@ -89,7 +89,7 @@ class BancoTest {
     // preserva o saldo negativo informado e gera identificadores esperados.
     @Test
     void abrirNovaContaQuandoEntradaEhDoisCriaContaPoupancaEMantemSaldoNegativo() {
-        configurarEntrada("2\n-50.0\n");
+        configurarEntrada("2\n-50,0\n");
 
         Conta conta = Banco.getInstancia().abrirNovaConta();
 
@@ -254,8 +254,8 @@ class BancoTest {
 
         assertEquals(10.0, banco.getDespesas(), DELTA);
         String saida = recuperarSaida();
-        assertTrue(saida.contains("Despesas do banco: 10.00"));
-        assertTrue(saida.contains("Receitas do banco: 20.00"));
+        assertTrue(saida.contains("Despesas do banco: 10,00"));
+        assertTrue(saida.contains("Receitas do banco: 20,00"));
     }
 
     // Verifica que a impressao do banco reduz o valor de despesas quando ele
@@ -271,8 +271,8 @@ class BancoTest {
         assertTrue(banco.getDespesas() >= 0.0);
         assertTrue(banco.getDespesas() < 1000.0);
         String saida = recuperarSaida();
-        assertTrue(saida.contains("Despesas do banco: 1000.0"));
-        assertTrue(saida.contains("Receitas do banco: 100.0"));
+        assertTrue(saida.contains("Despesas do banco: 1000,0"));
+        assertTrue(saida.contains("Receitas do banco: 100,0"));
     }
 
     // Verifica que os setters de receitas e despesas ignoram valores negativos
