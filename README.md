@@ -134,10 +134,11 @@ mvn test
 | Membro | Responsabilidades |
 |--------|-------------------|
 | Mauricio Baptista | Conta.java + Caso de teste manual|
-| _[Nome]_ | _[classes testadas / artefatos]_ |
-| _[Nome]_ | _[classes testadas / artefatos]_ |
-| _[Nome]_ | _[classes testadas / artefatos]_ |
-| _[Nome]_ | _[classes testadas / artefatos]_ |
+| João Victor | _[classes testadas / artefatos]_ |
+| Murilo Muniz | RegistroDeClientesTest.java + TestLink + Plano de testes |
+| Rafael Fersos | _[classes testadas / artefatos]_ |
+| João Pedro Santos de Rezende | Plano de testes|
+| Vinicius | _[classes testadas / artefatos]_ |
 
 ---
 
