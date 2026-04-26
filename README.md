@@ -127,7 +127,7 @@ mvn test
 | Membro | Responsabilidades |
 |--------|-------------------|
 | Mauricio Baptista | [Conta.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/ContaTest.java) + Casos de teste manual|
-| João Victor | _[classes testadas / artefatos]_ |
+| João Victor | [CartaoCredito.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/CartaoCredito.java) |
 | Murilo Muniz | [RegistroDeClientes.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemaclientes/RegistroDeClientesTest.java) + TestLink + Plano de testes |
 | Rafael Fersos | _[classes testadas / artefatos]_ |
 | João Pedro Santos de Rezende |[Banco.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/BancoTest.java) + Plano de testes|
