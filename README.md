@@ -81,7 +81,7 @@ A partir da raiz do repositório:
 
 ```bash
 cd winxbank
-mvn clean compile exec:java
+mvn spring-boot:run
 ```
 
 ### Rodar os testes unitários
