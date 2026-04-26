@@ -9,7 +9,7 @@ Repositório do grupo **Os Renegados** para o trabalho prático da disciplina de
 
 ### Entrega 1 (27/04/2026)
 
-- **Plano de Teste:** 
+- **Plano de Teste:** [https://docs.google.com/document/d/13wnAgiC9lXXx8CySR7Oy6DkSOQaZbA07/edit]
 - **Casos de teste manuais:** 
 - **Casos de teste unitários:** ver [winxbank/src/test/java/br/winxbank/](winxbank/src/test/java/br/winxbank/)
 - **Issues de bugs encontrados:** 
