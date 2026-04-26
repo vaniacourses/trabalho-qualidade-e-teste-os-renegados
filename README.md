@@ -12,7 +12,7 @@ Repositório do grupo **Os Renegados** para o trabalho prático da disciplina de
 - **Plano de Teste:** [Plano de Teste](https://docs.google.com/document/d/13wnAgiC9lXXx8CySR7Oy6DkSOQaZbA07/edit)
 - **Casos de teste manuais:** [Casos de teste](https://docs.google.com/document/d/1TTp5T8REYK5ma4Xo3olDtyH86U6_suIue64kZci8hM8/edit?usp=sharing) + [Testlink](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/Teste%20Manual%20-%20Visualiza%C3%A7%C3%A3o%20de%20detalhes%20do%20cliente%20winx.pdf)
 - **Casos de teste unitários:** ver [winxbank/src/test/java/br/winxbank/](winxbank/src/test/java/br/winxbank/)
-- **Issues de bugs encontrados:** 
+- **Issues de bugs encontrados:** [Issues](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/issues)
 
 ### Entrega 2 (17/06/2026)
 
