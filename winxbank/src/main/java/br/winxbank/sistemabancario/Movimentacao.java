@@ -1,6 +1,8 @@
 package br.winxbank.sistemabancario;
 
 import br.winxbank.tempo.Ano;
+import br.winxbank.tempo.MesAtualProvider;
+import br.winxbank.tempo.MesAtualProviderAnoSingleton;
 
 /**
  * @author Natália.
@@ -40,6 +42,16 @@ public class Movimentacao{
         this.dinheiroMovimentado = dinheiroMovimentado;
         this.tipoDaMovimentacao = tipoDaMovimentacao;
 
+    }
+
+    /**
+     * Construtor alternativo para testes / injeção de dependência.
+     */
+    public Movimentacao(MesAtualProvider mesAtualProvider, double dinheiroMovimentado, TipoDaMovimentacao tipoDaMovimentacao) {
+        MesAtualProvider provider = (mesAtualProvider == null) ? new MesAtualProviderAnoSingleton() : mesAtualProvider;
+        this.mesAtual = provider.getMesAtual();
+        this.dinheiroMovimentado = dinheiroMovimentado;
+        this.tipoDaMovimentacao = tipoDaMovimentacao;
     }
 
 
