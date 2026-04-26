@@ -133,7 +133,7 @@ mvn test
 
 | Membro | Responsabilidades |
 |--------|-------------------|
-| Mauricio Baptista | Conta.java |
+| Mauricio Baptista | Conta.java + Caso de teste manual|
 | _[Nome]_ | _[classes testadas / artefatos]_ |
 | _[Nome]_ | _[classes testadas / artefatos]_ |
 | _[Nome]_ | _[classes testadas / artefatos]_ |
