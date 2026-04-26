@@ -84,13 +84,6 @@ cd winxbank
 mvn clean compile exec:java
 ```
 
-Ou para gerar o JAR:
-
-```bash
-cd winxbank
-mvn install
-```
-
 ### Rodar os testes unitários
 
 ```bash
