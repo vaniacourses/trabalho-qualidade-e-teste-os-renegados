@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author Dani
  * Esta classe é responsável por representar uma entidade Cliente.
  */
-public class Cliente{
+public class Cliente implements AutoCloseable {
     protected String nome;
     protected String cpf;
     protected ArrayList<Conta> contas = new ArrayList<>();
@@ -90,4 +90,8 @@ public class Cliente{
     public void setContas(ArrayList<Conta> contas) {
         this.contas.addAll(contas);
     }
+
+    @Override
+    public void close() {}
 }
+
