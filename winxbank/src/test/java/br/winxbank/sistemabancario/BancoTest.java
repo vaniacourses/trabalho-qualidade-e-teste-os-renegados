@@ -256,6 +256,47 @@ class BancoTest {
      *
      */
     @Test
+    void movimentarEntreBancoContaQuandoContaEhPoupancaAcrescentaRendimento() {
+        Cliente cliente = mock(Cliente.class);
+        ContaPoupanca contaPoupanca = mock(ContaPoupanca.class);
+        when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(contaPoupanca)));
+        RegistroDeClientes.getInstancia().getClientes().add(cliente);
+
+        Banco.getInstancia().movimentarEntreBancoConta();
+
+        verify(cliente).getContas();
+        verify(contaPoupanca).cobrarJurusEmprestimo();
+        verify(contaPoupanca).acrescentarRendimento();
+    }
+
+    /**
+     * Metodo responsavel por testar a movimentacao do banco para com uma conta corrente
+     *
+     */
+    @Test
+    void movimentarEntreBancoContaQuandoContaEhCorrenteDescontaTaxaECobraJurosDaFatura() {
+        Cliente cliente = mock(Cliente.class);
+        ContaCorrente contaCorrente = mock(ContaCorrente.class);
+        CartaoCredito cartaoCredito = mock(CartaoCredito.class);
+        when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(contaCorrente)));
+        when(contaCorrente.getCartaoCredito()).thenReturn(cartaoCredito);
+        when(cartaoCredito.getFatura()).thenReturn(100.0);
+        RegistroDeClientes.getInstancia().getClientes().add(cliente);
+
+        Banco.getInstancia().movimentarEntreBancoConta();
+
+        verify(cliente).getContas();
+        verify(contaCorrente).cobrarJurusEmprestimo();
+        verify(contaCorrente).descontarTaxa();
+        verify(cartaoCredito).getFatura();
+        verify(cartaoCredito).cobrarJurus();
+    }
+
+    /**
+     * Metodo responsavel por testar a movimentacao do banco para com uma conta quando nao existem contas
+     *
+     */
+    @Test
     void movimentarEntreBancoContaQuandoNaoHaClientesNaoAlteraEstado() {
         Banco banco = Banco.getInstancia();
 

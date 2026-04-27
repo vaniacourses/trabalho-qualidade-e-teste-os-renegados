@@ -82,13 +82,13 @@ public class Banco implements Serializable {
             for(Cliente cliente : RegistroDeClientes.getInstancia().getClientes()){
                 for(Conta conta : cliente.getContas()){
                     conta.cobrarJurusEmprestimo();
-                    if(conta.getClass() == ContaPoupanca.class){
-                        ((ContaPoupanca) conta).acrescentarRendimento();
+                    if(conta instanceof ContaPoupanca contaPoupanca){
+                        contaPoupanca.acrescentarRendimento();
                     }
-                    else if(conta.getClass() == ContaCorrente.class){
-                        ((ContaCorrente) conta).descontarTaxa();
-                        if(((ContaCorrente) conta).getCartaoCredito().getFatura() > 0){
-                            ((ContaCorrente) conta).getCartaoCredito().cobrarJurus();
+                    else if(conta instanceof ContaCorrente contaCorrente){
+                        contaCorrente.descontarTaxa();
+                        if(contaCorrente.getCartaoCredito().getFatura() > 0){
+                            contaCorrente.getCartaoCredito().cobrarJurus();
                         }
                     }
                 }
