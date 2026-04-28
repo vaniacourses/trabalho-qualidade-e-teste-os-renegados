@@ -132,6 +132,7 @@ mvn test
 | Rafael Fersos | _[classes testadas / artefatos]_ |
 | João Pedro Santos de Rezende |[Banco.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/BancoTest.java) + Plano de testes|
 | Antônio Vinicius | [ClienteWinx.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/feature/antoniovini/winxbank/src/main/java/br/winxbank/sistemaclientes/ClienteWinx.java) + [Movimentacao.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/feature/antoniovini/winxbank/src/main/java/br/winxbank/sistemabancario/Movimentacao.java) + Implementação do sistema de pontos ([PoliticaDeConversaoPadrao.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/feature/antoniovini/winxbank/src/main/java/br/winxbank/sistemaclientes/PoliticaDeConversaoPadrao.java)) + Apresentação PPT |
+| Allan Breno | [ContaCorrente.java] + Casos de teste Manual |
 
 ---
 
