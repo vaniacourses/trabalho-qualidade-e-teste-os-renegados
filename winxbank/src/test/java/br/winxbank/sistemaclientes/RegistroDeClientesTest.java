@@ -62,7 +62,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaCorrente conta = mock(ContaCorrente.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(true);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(50.0);
@@ -76,7 +76,7 @@ class RegistroDeClientesTest {
         verify(conta).setExtrato(any(Movimentacao.class));
         verify(clientes).add(clienteCadastrado.capture());
         assertEquals(Cliente.class, clienteCadastrado.getValue().getClass());
-        assertEquals("JOÃO", clienteCadastrado.getValue().getNome());
+        assertEquals("JoaoPedro", clienteCadastrado.getValue().getNome());
         assertEquals("123", clienteCadastrado.getValue().getCpf());
         assertSame(conta, clienteCadastrado.getValue().getContas().get(0));
     }
@@ -92,7 +92,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaCorrente conta = mock(ContaCorrente.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
 
@@ -107,7 +107,7 @@ class RegistroDeClientesTest {
         verify(conta).setExtrato(any(Movimentacao.class));
         verify(clientes).add(clienteCadastrado.capture()); // captura o objeto que foi passado como argumento.
         assertEquals(Cliente.class, clienteCadastrado.getValue().getClass());
-        assertEquals("JOÃO", clienteCadastrado.getValue().getNome());
+        assertEquals("JoaoPedro", clienteCadastrado.getValue().getNome());
         assertEquals("123", clienteCadastrado.getValue().getCpf());
         assertSame(conta, clienteCadastrado.getValue().getContas().get(0));
     }
@@ -122,7 +122,7 @@ class RegistroDeClientesTest {
         ArrayList<Cliente> clientes = mock(ArrayList.class);
         campoClientes.set(registro, clientes);
 
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
 
         registro.cadastrarCliente();
@@ -144,7 +144,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaCorrente conta = mock(ContaCorrente.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(true);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(50.0);
@@ -158,7 +158,7 @@ class RegistroDeClientesTest {
         verify(conta).setExtrato(any(Movimentacao.class));
         verify(clientes).add(clienteCadastrado.capture());
         assertEquals(Cliente.class, clienteCadastrado.getValue().getClass());
-        assertEquals("JOÃO", clienteCadastrado.getValue().getNome());
+        assertEquals("JoaoPedro", clienteCadastrado.getValue().getNome());
         assertEquals("123", clienteCadastrado.getValue().getCpf());
         assertSame(conta, clienteCadastrado.getValue().getContas().get(0));
     }
@@ -173,7 +173,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaCorrente conta = mock(ContaCorrente.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(99999.9);
@@ -198,7 +198,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaCorrente conta = mock(ContaCorrente.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(100000.0);
@@ -223,7 +223,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaPoupanca conta = mock(ContaPoupanca.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(99999.9);
@@ -249,7 +249,7 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         ContaPoupanca conta = mock(ContaPoupanca.class);
-        System.setIn(new ByteArrayInputStream("JOÃO\n123\n".getBytes(StandardCharsets.UTF_8)));
+        System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
         when(conta.getSaldo()).thenReturn(100000.0);
