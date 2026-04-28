@@ -201,7 +201,7 @@ class RegistroDeClientesTest {
         System.setIn(new ByteArrayInputStream("JoaoPedro\n123\n".getBytes(StandardCharsets.UTF_8)));
         when(clientes.isEmpty()).thenReturn(false);
         when(banco.abrirNovaConta()).thenReturn(conta);
-        when(conta.getSaldo()).thenReturn(100000.0);
+        when(conta.getSaldo()).thenReturn(100000.5);
 
         registro.cadastrarCliente();
 
