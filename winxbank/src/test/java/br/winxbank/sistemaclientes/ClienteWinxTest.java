@@ -104,4 +104,56 @@ class ClienteWinxTest {
         verify(auditoria).registrarConversao(eq(cliente), eq(conta), eq(10), eq(30.0), any(Movimentacao.class));
         assertEquals(0, cliente.getPontosDeCompra());
     }
+
+    @Test
+    void construtorComDependenciasQuandoDependenciasSaoNulasMantemDefaultsESegueFluxoNormalDeConversao() {
+        ClienteWinx cliente = new ClienteWinx("ANA", "123", 10, null, null);
+        ContaCorrente conta = criarContaCorrente(0.0);
+
+        int extratoAntes = conta.getExtrato().size();
+        cliente.converterPontosEmSaldo(conta);
+
+        // regra da politica padrão: 3 reais por ponto (BONUSDECOMPRA)
+        assertEquals(30.0, conta.getSaldo(), 0.0001);
+        assertEquals(extratoAntes + 1, conta.getExtrato().size());
+        assertSame(Movimentacao.TipoDaMovimentacao.ENTRADA,
+                conta.getExtrato().get(conta.getExtrato().size() - 1).getTipoDaMovimentacao());
+        assertEquals(0, cliente.getPontosDeCompra());
+    }
+
+    @Test
+    void setPoliticaDeConversaoQuandoParametroNuloNaoDeveSubstituirPoliticaExistente() {
+        PoliticaDeConversaoDePontos politica = mock(PoliticaDeConversaoDePontos.class);
+        AuditoriaDeConversaoDePontos auditoria = mock(AuditoriaDeConversaoDePontos.class);
+
+        when(politica.converter(10)).thenReturn(123.0);
+
+        ClienteWinx cliente = new ClienteWinx("ANA", "123", 10, politica, auditoria);
+        ContaCorrente conta = criarContaCorrente(0.0);
+
+        cliente.setPoliticaDeConversao(null);
+        cliente.converterPontosEmSaldo(conta);
+
+        // Se a política tivesse sido trocada, o saldo não seria 123.0
+        assertEquals(123.0, conta.getSaldo(), 0.0001);
+        verify(politica).validarConversao(10);
+        verify(politica).converter(10);
+    }
+
+    @Test
+    void setAuditoriaDeConversaoQuandoParametroNuloNaoDeveSubstituirAuditoriaExistente() {
+        PoliticaDeConversaoDePontos politica = mock(PoliticaDeConversaoDePontos.class);
+        AuditoriaDeConversaoDePontos auditoria = mock(AuditoriaDeConversaoDePontos.class);
+
+        when(politica.converter(10)).thenReturn(50.0);
+
+        ClienteWinx cliente = new ClienteWinx("ANA", "123", 10, politica, auditoria);
+        ContaCorrente conta = criarContaCorrente(0.0);
+
+        cliente.setAuditoriaDeConversao(null);
+        cliente.converterPontosEmSaldo(conta);
+
+        // Comportamento esperado: ainda usa a auditoria original (mock) e NÃO troca por NoOp.
+        verify(auditoria).registrarConversao(eq(cliente), eq(conta), eq(10), eq(50.0), any(Movimentacao.class));
+    }
 }

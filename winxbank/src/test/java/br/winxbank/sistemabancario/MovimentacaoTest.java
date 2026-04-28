@@ -71,6 +71,15 @@ class MovimentacaoTest {
     }
 
     @Test
+    void construtorComProviderQuandoProviderENuloUsaMesAtualDoAnoSingleton() {
+        Movimentacao movimentacao = new Movimentacao(null, 10.0, Movimentacao.TipoDaMovimentacao.ENTRADA);
+
+        assertEquals(MES_FIXO, movimentacao.getMesAtual());
+        assertEquals(10.0, movimentacao.getDinheiroMovimentado(), DELTA);
+        assertSame(Movimentacao.TipoDaMovimentacao.ENTRADA, movimentacao.getTipoDaMovimentacao());
+    }
+
+    @Test
     void enumDaMovimentacaoPossuiValoresEsperados() {
         assertSame(Movimentacao.TipoDaMovimentacao.ENTRADA, Movimentacao.TipoDaMovimentacao.valueOf("ENTRADA"));
         assertSame(Movimentacao.TipoDaMovimentacao.SAIDA, Movimentacao.TipoDaMovimentacao.valueOf("SAIDA"));
