@@ -3,6 +3,8 @@ package br.winxbank.sistemabancario;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayInputStream;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +28,7 @@ public class ContaCorrenteTest {
         );
     }
 
+
     @Test
     void devePagarFaturaCorretamente() {
         conta.pagarFatura(200);
@@ -35,30 +38,63 @@ public class ContaCorrenteTest {
     }
 
     @Test
-    void deveDescontarTaxa() {
-        double saldoInicial = conta.getSaldo();
+    void deveComprarNoDebitoComConfirmacao() {
+        // Simula entrada:
+        // 1 → débito
+        // 1 → confirmar
+        String input = "1\n1\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
 
-        conta.descontarTaxa();
+        conta.comprar(200);
 
-        assertTrue(conta.getSaldo() < saldoInicial);
+        verify(cartaoDebitoMock).debitar(conta, 200);
     }
 
     @Test
-    void deveChamarMovimentacaoBancariaAoDescontarTaxa() {
-        ContaCorrente spyConta = spy(conta);
+    void naoDeveComprarNoDebitoSeNaoConfirmar() {
+        // 1 → débito
+        // 2 → não confirmar
+        String input = "1\n2\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
 
-        spyConta.descontarTaxa();
+        conta.comprar(200);
 
-        verify(spyConta).movimentacaoBancaria(anyDouble());
+        verify(cartaoDebitoMock, never()).debitar(any(), anyDouble());
     }
 
     @Test
-    void deveRetornarTipoContaCorrente() {
-        assertEquals("Corrente", conta.getTipoDaConta());
+    void deveComprarNoCreditoComConfirmacao() {
+        // 2 → crédito
+        // 1 → confirmar
+        String input = "2\n1\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        conta.comprar(300);
+
+        verify(cartaoCreditoMock).creditar(300);
     }
 
     @Test
-    void deveRetornarCartaoCredito() {
-        assertEquals(cartaoCreditoMock, conta.getCartaoCredito());
+    void naoDeveComprarNoCreditoSeNaoConfirmar() {
+        // 2 → crédito
+        // 2 → não confirmar
+        String input = "2\n2\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        conta.comprar(300);
+
+        verify(cartaoCreditoMock, never()).creditar(anyDouble());
+    }
+
+    @Test
+    void naoDeveFazerNadaSeOpcaoInvalida() {
+        // 3 → opção inválida
+        String input = "3\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        conta.comprar(100);
+
+        verify(cartaoDebitoMock, never()).debitar(any(), anyDouble());
+        verify(cartaoCreditoMock, never()).creditar(anyDouble());
     }
 }

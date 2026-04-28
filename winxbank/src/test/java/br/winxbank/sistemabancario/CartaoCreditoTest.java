@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import br.winxbank.tempo.Ano;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
+import java.io.ByteArrayInputStream;
 
 class CartaoCreditoTest {
 
@@ -17,13 +18,13 @@ class CartaoCreditoTest {
     }
 
     @Test
-    void CreditarFatura() {
+    void creditarFatura() {
         cartao.creditar(150.0);
         assertEquals(150.0, cartao.getFatura(), 0.001);
     }
 
     @Test
-    void TentativaExtourarLimite() {
+    void tentativaExtourarLimite() {
         cartao.creditar(700.0);
         cartao.creditar(200.0);
         cartao.creditar(300.0);
@@ -31,19 +32,19 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void CreditoNoLimiteDoCartao() {
+    void creditoNoLimiteDoCartao() {
         cartao.creditar(1000.0); 
         assertEquals(1000.0, cartao.getFatura(), 0.001);
     }
     
     @Test
-    void CreditoAcimaLimiteDoCartao() {
+    void creditoAcimaLimiteDoCartao() {
         cartao.creditar(1500.0); 
         assertEquals(0.0, cartao.getFatura(), 0.001);
     }
     
     @Test
-    void CreditoAposTentativaAcimaLimite() {
+    void creditoAposTentativaAcimaLimite() {
         cartao.creditar(2000.0);
         
         cartao.creditar(800.0);
@@ -54,7 +55,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void AtingirLimiteComSomaDeCreditos() {
+    void atingirLimiteComSomaDeCreditos() {
         cartao.creditar(300.0);
         cartao.creditar(250.0);
         cartao.creditar(350.0);
@@ -65,7 +66,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void LimiteNegativoNoSetFatura() {
+    void limiteNegativoNoSetFatura() {
         cartao.creditar(200.0);
         cartao.setFatura(-250.0);
         
@@ -74,7 +75,7 @@ class CartaoCreditoTest {
     
     
     @Test
-    void PagamentoParcialFatura() {
+    void pagamentoParcialFatura() {
         cartao.creditar(1000.0);
         cartao.setFatura(-500.0);
         
@@ -82,7 +83,7 @@ class CartaoCreditoTest {
     }
 
     @Test
-    void PagamentoTotalFatura() {
+    void pagamentoTotalFatura() {
         cartao.creditar(1000.0);
         cartao.setFatura(-1000.0);
         
@@ -90,7 +91,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void CobrarJurosMudancaDeMes() {
+    void cobrarJurosMudancaDeMes() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class);
              MockedStatic<Banco> mockedBanco = mockStatic(Banco.class)) {
             
@@ -113,7 +114,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void NaoCobrarJurosSeMesIgual() {
+    void naoCobrarJurosSeMesIgual() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class)) {
             
             Ano mockAno = mock(Ano.class);
@@ -130,7 +131,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void NaoCobrarJurosSeFaturaPaga() {
+    void naoCobrarJurosSeFaturaPaga() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class);
              MockedStatic<Banco> mockedBanco = mockStatic(Banco.class)) {
             
@@ -154,7 +155,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void NaoCobrarJurosSeSaldoNegativo() {
+    void naoCobrarJurosSeSaldoNegativo() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class)) {
             
         	Ano mockAno = mock(Ano.class);
@@ -172,13 +173,13 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void GetNumeroCSV() {
+    void getNumeroCSV() {
         assertEquals(1234567, cartao.getNumero());
         assertEquals(123, cartao.getCsv());
     }
     
     @Test
-    void CreditarZeroNaoAlteraFatura() {
+    void creditarZeroNaoAlteraFatura() {
         cartao.creditar(200.0);
         cartao.setFatura(0.0);  	
     	
@@ -186,7 +187,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void JurosAcumuladosMesAMes() {
+    void jurosAcumuladosMesAMes() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class)) {
             
         	Ano mockAno = mock(Ano.class);
@@ -207,7 +208,7 @@ class CartaoCreditoTest {
     }
     
     @Test
-    void VerificarInteracaoComBancoAoCobrarJuros() {
+    void verificarInteracaoComBancoAoCobrarJuros() {
         try (MockedStatic<Ano> mockedAno = mockStatic(Ano.class);
              MockedStatic<Banco> mockedBanco = mockStatic(Banco.class)) {
             
@@ -222,6 +223,31 @@ class CartaoCreditoTest {
             cartao.cobrarJurus();
             
             verify(mockBanco, times(1)).setReceitas(anyDouble());
+        }
+    }
+
+    @Test
+    void ajustarNovoLimite() {
+        String novoLimite = "3000,0";
+        System.setIn(new ByteArrayInputStream(novoLimite.getBytes()));
+        
+        cartao.ajustarLimite();
+        cartao.creditar(2500.0);
+        
+        assertEquals(2500.0, cartao.getFatura(), 0.001, "O limite deve ter sido aumentado para 3000, aceitando a compra de 2500.");
+    }
+
+    @Test
+    void movimentacaoBancaria() {
+        try (MockedStatic<Banco> mockedBanco = mockStatic(Banco.class)) {
+            
+            Banco mockBanco = mock(Banco.class);
+            mockedBanco.when(Banco::getInstancia).thenReturn(mockBanco);
+            
+            double valorMovimentado = 500.0;
+            cartao.movimentacaoBancaria(valorMovimentado);
+            
+            verify(mockBanco, times(1)).setReceitas(valorMovimentado);
         }
     }
     
