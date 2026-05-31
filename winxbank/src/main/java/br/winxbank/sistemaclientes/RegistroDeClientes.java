@@ -183,7 +183,7 @@ public class RegistroDeClientes {
 
 
     public ArrayList<Cliente> getClientes() {
-        return clientes;
+         return new ArrayList<Cliente>(clientes);
     }
 
     /**
