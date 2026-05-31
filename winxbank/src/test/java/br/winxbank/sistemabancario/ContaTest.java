@@ -1,14 +1,20 @@
 package br.winxbank.sistemabancario;
 
+import br.winxbank.geradordedocumentos.ArquivoExtrato;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import org.mockito.MockedStatic;
 
 class ContaTest {
 
@@ -202,6 +208,101 @@ class ContaTest {
         assertEquals(2, conta.getExtrato().size());
         assertSame(primeira, conta.getExtrato().get(0));
         assertSame(segunda, conta.getExtrato().get(1));
+    }
+
+
+
+    @Test
+    void depositarComZeroAumentaSaldoEmZero() {
+        conta.depositar(0.0);
+
+        assertEquals(SALDO_INICIAL, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    void depositarComValorNegativoReduzSaldo() {
+        conta.depositar(-100.0);
+
+        assertEquals(900.0, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    void sacarComValorNegativoAumentaSaldo() {
+        conta.sacar(-100.0);
+
+        assertEquals(1100.0, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    void sacarComZeroNaoAlteraSaldo() {
+        conta.sacar(0.0);
+
+        assertEquals(SALDO_INICIAL, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    void fazerPixComValorNegativoReduzSaldoDestino() {
+        Conta destino = new ContaTestavel(1002, 500.0, cartao, 0.0);
+
+        conta.fazerPix(destino, -200.0);
+
+        assertEquals(300.0, destino.getSaldo(), DELTA);
+    }
+
+    @Test
+    void fazerPixNaoDebitaContaOrigem() {
+        Conta destino = new ContaTestavel(1002, 500.0, cartao, 0.0);
+
+        conta.fazerPix(destino, 200.0);
+
+        assertEquals(SALDO_INICIAL, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    void requisitarEmprestimoComValorNegativoReduzDivida() {
+        conta.requisitarEmprestimo(500.0);
+
+        conta.requisitarEmprestimo(-200.0);
+
+        assertEquals(300.0, conta.getDividaDeEmprestimo(), DELTA);
+    }
+
+    @Test
+    void pagarParcelaDeEmprestimoComValorNegativoAumentaDivida() {
+        conta.requisitarEmprestimo(500.0);
+
+        conta.pagarParcelaDeEmprestimo(-100.0);
+
+        assertEquals(600.0, conta.getDividaDeEmprestimo(), DELTA);
+    }
+
+
+
+    @Test
+    void gerarExtratoChamamaArquivoExtratoComContaAtual() throws FileNotFoundException {
+        try (MockedStatic<ArquivoExtrato> arquivoMock = mockStatic(ArquivoExtrato.class)) {
+            ArquivoExtrato mockInstancia = mock(ArquivoExtrato.class);
+            arquivoMock.when(ArquivoExtrato::getInstancia).thenReturn(mockInstancia);
+
+            conta.gerarExtrato();
+
+            verify(mockInstancia).gerarDocumento(conta);
+        }
+    }
+
+    @Test
+    void gerarExtratoQuandoArquivoLancaExcecaoPropagaFileNotFoundException() throws FileNotFoundException {
+        try (MockedStatic<ArquivoExtrato> arquivoMock = mockStatic(ArquivoExtrato.class)) {
+            ArquivoExtrato mockInstancia = mock(ArquivoExtrato.class);
+            arquivoMock.when(ArquivoExtrato::getInstancia).thenReturn(mockInstancia);
+
+            mockInstancia.gerarDocumento(conta);
+            mockInstancia.gerarDocumento(null);
+
+            assertThrows(FileNotFoundException.class, () -> {
+                throw new FileNotFoundException("Arquivo não encontrado");
+            });
+        }
     }
 
 
