@@ -19,9 +19,10 @@ public class ArquivoBanco {
      * @throws FileNotFoundException
      */
     public void atualizarArquivo(Banco banco) throws FileNotFoundException {
-        try (ObjectOutputStream ous = new ObjectOutputStream(
-                new BufferedOutputStream(new FileOutputStream("banco.txt")))) {
-                    ous.writeObject(banco);
+         try (FileOutputStream fos = new FileOutputStream("banco.txt");
+       BufferedOutputStream bos = new BufferedOutputStream(fos);
+    ObjectOutputStream ous = new ObjectOutputStream(bos)) {
+        ous.writeObject(banco);
         } catch (FileNotFoundException e) {
 
             e.printStackTrace();
