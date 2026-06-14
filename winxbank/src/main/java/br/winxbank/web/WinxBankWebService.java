@@ -1045,7 +1045,11 @@ public class WinxBankWebService {
     }
 
     private int inteiro(Map<String, String> form, String campo) {
-        return Integer.parseInt(texto(form, campo));
+        try {
+            return Integer.parseInt(texto(form, campo));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Campo numérico inválido: " + campo, e);
+        }
     }
 
     private double decimal(Map<String, String> form, String campo) {
