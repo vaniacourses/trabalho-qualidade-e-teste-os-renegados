@@ -93,6 +93,10 @@ public class WinxBankWebServer {
         if(port == null || port.isBlank()){
             return 8080;
         }
-        return Integer.parseInt(port);
+        try {
+            return Integer.parseInt(port.trim());
+        } catch (NumberFormatException e) {
+            return 8080;
+        }
     }
 }
