@@ -67,6 +67,20 @@ public class CartaoCredito extends Cartao implements OperacoesAutomaticas{
 
     }
 
+
+    /**
+     * Sobrecarga usada pela interface web para ajustar limite sem depender do Scanner.
+     *
+     * @param novoLimite novo limite do cartão de crédito
+     */
+    public void ajustarLimite(double novoLimite){
+        this.limite = novoLimite;
+    }
+
+    public double getLimite() {
+        return limite;
+    }
+
     /**
      * Setter com regra de negócio de que se o valor setado for menor ou igual ao limite, permitir modificação.
      * Além disso, há mudança de status de fatura paga dependendo do valor setado no momento neste setter.

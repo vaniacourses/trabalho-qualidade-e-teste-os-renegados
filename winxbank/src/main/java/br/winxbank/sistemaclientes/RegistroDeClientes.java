@@ -55,6 +55,48 @@ public class RegistroDeClientes {
         }
     }
 
+
+    /**
+     * Sobrecarga usada pela interface web para cadastrar cliente sem depender do Scanner.
+     * Recebe pelos parâmetros os mesmos dados que antes eram digitados no terminal.
+     *
+     * @param nome nome do cliente
+     * @param cpf CPF do cliente
+     * @param tipoConta 1 para Corrente, 2 para Poupanca
+     * @param saldoInicial saldo inicial da primeira conta
+     * @return cliente criado ou null se CPF já existir/tipo de conta for inválido
+     */
+    public Cliente cadastrarCliente(String nome, String cpf, int tipoConta, double saldoInicial){
+        boolean cpfExistente = checarCpf(cpf);
+        if(cpfExistente || clientes.isEmpty()){
+            Cliente cliente = new Cliente(nome, cpf);
+            Conta conta = Banco.getInstancia().abrirNovaConta(tipoConta, saldoInicial);
+            if(conta == null){
+                return null;
+            }
+            cliente.setContas(conta);
+            Movimentacao movimentacao = new Movimentacao(conta.getSaldo(), Movimentacao.TipoDaMovimentacao.ENTRADA);
+            conta.setExtrato(movimentacao);
+            if(conta.getSaldo() >= 100000){
+                ClienteWinx clienteWinx = new ClienteWinx(nome, cpf, 0);
+                clienteWinx.setContas(conta);
+                clientes.add(clienteWinx);
+                if(conta.getClass() == ContaPoupanca.class){
+                    ((ContaPoupanca) conta).setInformeRendimento(movimentacao);
+                }
+                return clienteWinx;
+            }
+            else {
+                clientes.add(cliente);
+                if(conta.getClass() == ContaPoupanca.class){
+                    ((ContaPoupanca) conta).setInformeRendimento(movimentacao);
+                }
+                return cliente;
+            }
+        }
+        return null;
+    }
+
     /**
      * Este método é responsável por atualizar dados de um cliente do registro de clientes
      * @param cliente

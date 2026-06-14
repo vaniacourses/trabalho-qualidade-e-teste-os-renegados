@@ -36,6 +36,21 @@ Você pode executar em modo produção ou debug diretamente através da IDE. Voc
 mvn clean compile exec:java
 ```
 
+
+## 3.3. Executando a versão Web local
+
+Esta entrega adiciona uma interface web local para substituir os inputs do terminal por campos HTML, mantendo o projeto em Java.
+
+Na pasta `winxbank`, execute:
+
+```
+mvn clean compile exec:java
+```
+
+Depois acesse `http://localhost:8080`.
+
+A classe principal da versão web é `br.winxbank.web.WinxBankWebServer`. Veja mais detalhes em `README_WEB.md`.
+
 # 4. Estrutura deste Repositório
 
 **EM Construção**
