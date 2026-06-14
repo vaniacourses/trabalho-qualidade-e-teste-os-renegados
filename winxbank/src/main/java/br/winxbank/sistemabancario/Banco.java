@@ -57,6 +57,34 @@ public class Banco implements Serializable {
     return null;
     }
 
+
+    /**
+     * Sobrecarga usada pela interface web para abrir conta sem depender do Scanner.
+     * Mantém a mesma regra de criação do método de terminal.
+     *
+     * @param decisao 1 para Corrente, 2 para Poupanca
+     * @param saldo saldo inicial da conta
+     * @return conta criada ou null se o tipo for inválido
+     */
+    public Conta abrirNovaConta(int decisao, double saldo) {
+        if(decisao == 1){
+            int numeroCartao = RandomNumberGenerator.gerarNumCartao();
+            int csv = RandomNumberGenerator.gerarCsv();
+            Cartao cartao = new Cartao(numeroCartao, csv);
+            CartaoCredito cartaoCredito = new CartaoCredito(numeroCartao, csv);
+            int numeroConta = RandomNumberGenerator.gerarNumConta();
+            return new ContaCorrente(numeroConta, saldo, cartao, 0, cartaoCredito);
+        }
+        else if(decisao == 2){
+            int numeroCartao = RandomNumberGenerator.gerarNumCartao();
+            int csv = RandomNumberGenerator.gerarCsv();
+            Cartao cartao = new Cartao(numeroCartao, csv);
+            int numeroConta = RandomNumberGenerator.gerarNumConta();
+            return new ContaPoupanca(numeroConta, saldo, cartao, 0);
+        }
+        return null;
+    }
+
     /**
      * Método responsável por encerrar uma conta de um cliente.
      * @param cliente
@@ -71,6 +99,21 @@ public class Banco implements Serializable {
         }
         cliente.apagarConta(contaSelecionada);
         System.out.println("Sua conta foi apagada com sucesso!");
+    }
+
+
+    /**
+     * Sobrecarga usada pela interface web para fechar conta sem depender do Scanner.
+     *
+     * @param cliente cliente logado
+     * @param numeroConta número da conta que será encerrada
+     */
+    public void fecharConta(Cliente cliente, int numeroConta){
+        Conta contaSelecionada = cliente.selecionarConta(numeroConta);
+        if(contaSelecionada == null){
+            throw new BankAccountNotFoundException();
+        }
+        cliente.apagarConta(contaSelecionada);
     }
 
     /**

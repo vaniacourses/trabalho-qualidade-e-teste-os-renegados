@@ -90,4 +90,21 @@ public class ContaPoupanca extends Conta implements OperacoesAutomaticas{
         String tipoDaConta = "Poupanca";
         return tipoDaConta;
     }
+
+
+    /**
+     * Sobrecarga usada pela interface web para comprar sem depender do Scanner.
+     *
+     * @param valor valor da compra
+     * @param decisao2 1 para confirmar a compra
+     * @return true se a compra foi confirmada
+     */
+    public boolean comprar(double valor, int decisao2) {
+        if(decisao2 == 1){
+            cartao.debitar(this, valor);
+            return true;
+        }
+        return false;
+    }
+
 }
