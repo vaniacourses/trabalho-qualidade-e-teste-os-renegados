@@ -18,7 +18,7 @@ Repositório do grupo **Os Renegados** para o trabalho prático da disciplina de
 
 
 - **Testes de integração:** [Testes](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/tree/main/winxbank/src/test/java/br/winxbank/sistemabancario/integracao)
-- **Avaliação ISO 25010:**  [ISO 25010]([https://docs.google.com/document/d/13wnAgiC9lXXx8CySR7Oy6DkSOQaZbA07/edit](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/ISO%2025010.md))
+- **Avaliação ISO 25010:**  [ISO 25010](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/ISO%2025010.md)
 - **Testes de sistema :**  
 - **Testes funcionais / estruturais / mutação:** [Relatório](https://docs.google.com/document/d/1F5N4BhtTQtHB9-Zx7_unbLB8M3LH4fn8Ckh-GqK5y04/edit?usp=sharing)
 - **Relatório de inspeção de código (SonarQube):** [Relatório](https://docs.google.com/document/d/1ksSR66hGC1dVzXYMvVHCxe0Iz7V02QlfNnWiOg3JBAQ/edit?usp=sharing) feito com o GitHub CodeQL ou [execução](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/security/quality) do code analysis dentro do GitHub
