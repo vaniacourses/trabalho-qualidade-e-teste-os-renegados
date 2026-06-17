@@ -22,6 +22,10 @@ public class ArquivoDeMesAtual {
     }
 
     public void lerMesAtual(){
+        File arquivo = new File("mesAtual.txt");
+        if (!arquivo.exists()) {
+            return;
+        }
         try(BufferedReader reader = new BufferedReader(new FileReader("mesAtual.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = reader.readLine();
