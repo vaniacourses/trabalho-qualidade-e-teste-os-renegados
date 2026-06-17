@@ -47,8 +47,10 @@ class ContaIntegrationTest {
 
         assertEquals(4, conta.getExtrato().size(),
                 "Extrato deve conter 4 movimentações (inicial, depósito, saque, empréstimo)");
-        assertEquals(2300.0, conta.getSaldo(), DELTA,
-                "Saldo final deve ser 1000 (inicial) + 500 (depósito) - 200 (saque) + 1000 (empréstimo) = 2300");
+        // requisitarEmprestimo() NÃO credita o valor no saldo; apenas registra a dívida.
+        // Saldo final = 1000 (inicial) + 500 (depósito) - 200 (saque) = 1300.
+        assertEquals(1300.0, conta.getSaldo(), DELTA,
+                "Saldo final deve ser 1000 (inicial) + 500 (depósito) - 200 (saque) = 1300");
         assertEquals(1000.0, conta.getDividaDeEmprestimo(), DELTA,
                 "Dívida de empréstimo deve ser 1000");
     }
