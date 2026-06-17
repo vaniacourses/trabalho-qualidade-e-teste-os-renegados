@@ -126,7 +126,7 @@ mvn test
 
 | Membro | Responsabilidades |
 |--------|-------------------|
-| Mauricio Baptista | [Conta.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/ContaTest.java) + Casos de teste manual|
+| Mauricio Baptista | [Conta.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/ContaTest.java) + Casos de teste manual + Testes de Integração [ContaIntegrationTest.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/integracao/ContaIntegrationTest.java)+ Classificação ISO 25010 + Resolução de Bug + Teste de sistema [DepositoSeleniumTest.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/web/DepositoSeleniumTest.java) + Relatório Análise PIT |
 | João Victor | [CartaoCredito.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/CartaoCreditoTest.java) + Casos de teste manual |
 | Murilo Muniz | [RegistroDeClientes.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemaclientes/RegistroDeClientesTest.java) + TestLink + Plano de testes |
 | João Pedro Santos de Rezende |[Banco.java](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/winxbank/src/test/java/br/winxbank/sistemabancario/BancoTest.java) + Plano de testes|
