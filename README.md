@@ -17,7 +17,7 @@ Repositório do grupo **Os Renegados** para o trabalho prático da disciplina de
 ### Entrega 2 (17/06/2026)
 
 
-- **Testes de integração:** [Testes](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/tree/main/winxbank/src/test/java/br/winxbank/sistemabancario/integracao)
+- **Testes de integração:** [Testes Sistema Bancário](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/tree/main/winxbank/src/test/java/br/winxbank/sistemabancario/integracao), [Teste Sistema Clientes](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/tree/main/winxbank/src/test/java/br/winxbank/sistemaclientes/integracao)
 - **Avaliação ISO 25010:**  [ISO 25010](https://github.com/vaniacourses/trabalho-qualidade-e-teste-os-renegados/blob/main/ISO%2025010.md)
 - **Testes de sistema :**  
 - **Testes funcionais / estruturais / mutação:** [Relatório](https://docs.google.com/document/d/1F5N4BhtTQtHB9-Zx7_unbLB8M3LH4fn8Ckh-GqK5y04/edit?usp=sharing)
