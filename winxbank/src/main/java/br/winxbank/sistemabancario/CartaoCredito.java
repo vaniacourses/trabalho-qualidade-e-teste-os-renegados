@@ -118,6 +118,7 @@ public class CartaoCredito extends Cartao implements OperacoesAutomaticas{
      * Método responsável por gerar receita ao banco do valor pago a mais da cobrança de jurus em cima de uma fatura.
      * @param valor
      */
+    @Override
     public void movimentacaoBancaria(double valor) {
         Banco.getInstancia().setReceitas(valor);
     }
