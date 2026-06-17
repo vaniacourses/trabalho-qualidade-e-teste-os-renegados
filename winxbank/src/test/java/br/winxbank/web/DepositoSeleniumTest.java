@@ -87,8 +87,12 @@ public class DepositoSeleniumTest {
 
     private double parseSaldo(String textoSaldo) {
         String limpo = textoSaldo.replace("R$ ", "")
-                                 .replace(".", "")
-                                 .replace(",", ".");
-        return Double.parseDouble(limpo);
+                .replace(".", "")
+                .replace(",", ".");
+        try {
+            return Double.parseDouble(limpo);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Formato de saldo inválido: " + textoSaldo, e);
+        }
     }
 }
