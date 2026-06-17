@@ -39,36 +39,21 @@ public class ArquivoBanco {
      * @throws ClassNotFoundException
      */
     public void construirBanco() throws IOException, ClassNotFoundException {
-        ObjectInputStream ins = null;
         ArrayList<Banco> banco = new ArrayList<>();
 
-        try {
-            ins = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File("banco.txt"))));
-
-            try {
-                banco.add((Banco) ins.readObject());
-
-            } catch (ClassNotFoundException e1) {
-                e1.printStackTrace();
-            }
-
+        try (ObjectInputStream ins = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File("banco.txt"))))) {
+            banco.add((Banco) ins.readObject());
+        } catch (ClassNotFoundException e1) {
+            e1.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
-            if (ins != null) {
-                try {
-                    ins.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            for(Banco banco2 : banco){
-                Banco.getInstancia().setBanco(banco2);
-            }
         }
 
+        for(Banco banco2 : banco){
+            Banco.getInstancia().setBanco(banco2);
+        }
     }
 
     /**

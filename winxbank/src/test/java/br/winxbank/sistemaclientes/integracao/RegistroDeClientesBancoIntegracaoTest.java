@@ -37,7 +37,7 @@ class RegistroDeClientesBancoIntegracaoTest {
         Banco.getInstancia().movimentarEntreBancoConta();
 
         verify(cliente).getContas();
-        verify(conta).cobrarJurosEmprestimo();
+        verify(conta).cobrarJurusEmprestimo();
     }
 
     @Test
@@ -50,7 +50,7 @@ class RegistroDeClientesBancoIntegracaoTest {
         Banco.getInstancia().movimentarEntreBancoConta();
 
         verify(cliente).getContas();
-        verify(contaPoupanca).cobrarJurosEmprestimo();
+        verify(contaPoupanca).cobrarJurusEmprestimo();
         verify(contaPoupanca).acrescentarRendimento();
     }
 
@@ -71,7 +71,7 @@ class RegistroDeClientesBancoIntegracaoTest {
         verify(contaCorrente).descontarTaxa();
         verify(contaCorrente, times(2)).getCartaoCredito();
         verify(cartaoCredito).getFatura();
-        verify(cartaoCredito).cobrarJuros();
+        verify(cartaoCredito).cobrarJurus();
     }
 
     @Test
