@@ -14,6 +14,8 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -680,9 +682,9 @@ class RegistroDeClientesTest {
         campoClientes.set(registro, clientes);
 
         Cliente cliente = spy(new Cliente("Cliente Comum", "456"));
-        
+
         clientes.add(cliente);
-        
+
         when(cliente.getContas()).thenReturn(new ArrayList<>());
 
         registro.printarListaDeClientes();
@@ -691,5 +693,304 @@ class RegistroDeClientesTest {
         verify(cliente).getCpf();
         verify(cliente).getContas();
         verify(registro).visualizarContas(cliente);
+    }
+
+    // ==================== TESTES PARA cadastrarCliente(String, String, int, double) ====================
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF já existe, lista não vazia
+    void cadastrarClienteParametrizadoCpfExistenteListaNaoVaziaTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(false);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        Cliente clienteExistente = new Cliente("Existente", "456");
+        clientes.add(clienteExistente);
+        campoClientes.set(registro, clientes);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 1000.0);
+
+        assertNull(resultado);
+        assertEquals(1, clientes.size());
+        assertEquals("Existente", clientes.get(0).getNome());
+        verify(registro).checarCpf("123");
+        verify(banco, never()).abrirNovaConta(anyInt(), anyDouble());
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - Tipo de conta inválido (conta null)
+    void cadastrarClienteParametrizadoTipoContaInvalidoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        when(banco.abrirNovaConta(99, 1000.0)).thenReturn(null);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 99, 1000.0);
+
+        assertNull(resultado);
+        assertTrue(clientes.isEmpty());
+        verify(banco).abrirNovaConta(99, 1000.0);
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista vazia, ContaCorrente, saldo < 100000
+    void cadastrarClienteParametrizadoCpfNovoListaVaziaCorrenteSaldoBaixoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 50000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(50000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 50000.0);
+
+        assertNotNull(resultado);
+        assertEquals(Cliente.class, resultado.getClass());
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(1, clientes.size());
+        assertSame(resultado, clientes.get(0));
+        verify(banco).abrirNovaConta(1, 50000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista vazia, ContaCorrente, saldo >= 100000
+    void cadastrarClienteParametrizadoCpfNovoListaVaziaCorrenteSaldoAltoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 150000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(150000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 150000.0);
+
+        assertNotNull(resultado);
+        assertInstanceOf(ClienteWinx.class, resultado);
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(1, clientes.size());
+        assertSame(resultado, clientes.get(0));
+        verify(banco).abrirNovaConta(1, 150000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista vazia, ContaPoupanca, saldo < 100000
+    void cadastrarClienteParametrizadoCpfNovoListaVaziaPoupancaSaldoBaixoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaPoupanca conta = mock(ContaPoupanca.class);
+        when(banco.abrirNovaConta(2, 50000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(50000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 2, 50000.0);
+
+        assertNotNull(resultado);
+        assertEquals(Cliente.class, resultado.getClass());
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(1, clientes.size());
+        assertSame(resultado, clientes.get(0));
+        verify(banco).abrirNovaConta(2, 50000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+        verify(conta).setInformeRendimento(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista vazia, ContaPoupanca, saldo >= 100000
+    void cadastrarClienteParametrizadoCpfNovoListaVaziaPoupancaSaldoAltoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaPoupanca conta = mock(ContaPoupanca.class);
+        when(banco.abrirNovaConta(2, 150000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(150000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 2, 150000.0);
+
+        assertNotNull(resultado);
+        assertInstanceOf(ClienteWinx.class, resultado);
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(1, clientes.size());
+        assertSame(resultado, clientes.get(0));
+        verify(banco).abrirNovaConta(2, 150000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+        verify(conta).setInformeRendimento(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista não vazia, ContaCorrente, saldo < 100000
+    void cadastrarClienteParametrizadoCpfNovoListaNaoVaziaCorrenteSaldoBaixoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        Cliente clienteExistente = new Cliente("Existente", "456");
+        clientes.add(clienteExistente);
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 50000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(50000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 50000.0);
+
+        assertNotNull(resultado);
+        assertEquals(Cliente.class, resultado.getClass());
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(2, clientes.size());
+        assertSame(resultado, clientes.get(1));
+        verify(banco).abrirNovaConta(1, 50000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista não vazia, ContaCorrente, saldo >= 100000
+    void cadastrarClienteParametrizadoCpfNovoListaNaoVaziaCorrenteSaldoAltoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        Cliente clienteExistente = new Cliente("Existente", "456");
+        clientes.add(clienteExistente);
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 150000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(150000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 150000.0);
+
+        assertNotNull(resultado);
+        assertInstanceOf(ClienteWinx.class, resultado);
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(2, clientes.size());
+        assertSame(resultado, clientes.get(1));
+        verify(banco).abrirNovaConta(1, 150000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista não vazia, ContaPoupanca, saldo < 100000
+    void cadastrarClienteParametrizadoCpfNovoListaNaoVaziaPoupancaSaldoBaixoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        Cliente clienteExistente = new Cliente("Existente", "456");
+        clientes.add(clienteExistente);
+        campoClientes.set(registro, clientes);
+
+        ContaPoupanca conta = mock(ContaPoupanca.class);
+        when(banco.abrirNovaConta(2, 50000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(50000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 2, 50000.0);
+
+        assertNotNull(resultado);
+        assertEquals(Cliente.class, resultado.getClass());
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(2, clientes.size());
+        assertSame(resultado, clientes.get(1));
+        verify(banco).abrirNovaConta(2, 50000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+        verify(conta).setInformeRendimento(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF novo, lista não vazia, ContaPoupanca, saldo >= 100000
+    void cadastrarClienteParametrizadoCpfNovoListaNaoVaziaPoupancaSaldoAltoTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        Cliente clienteExistente = new Cliente("Existente", "456");
+        clientes.add(clienteExistente);
+        campoClientes.set(registro, clientes);
+
+        ContaPoupanca conta = mock(ContaPoupanca.class);
+        when(banco.abrirNovaConta(2, 150000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(150000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 2, 150000.0);
+
+        assertNotNull(resultado);
+        assertInstanceOf(ClienteWinx.class, resultado);
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(2, clientes.size());
+        assertSame(resultado, clientes.get(1));
+        verify(banco).abrirNovaConta(2, 150000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+        verify(conta).setInformeRendimento(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - CPF existe, lista vazia (bug na lógica OR)
+    void cadastrarClienteParametrizadoCpfExistenteListaVaziaTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(false);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 50000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(50000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 50000.0);
+
+        assertNotNull(resultado);
+        assertEquals(Cliente.class, resultado.getClass());
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        assertEquals(1, clientes.size());
+        verify(banco).abrirNovaConta(1, 50000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
+    }
+
+    @Test
+    // cadastrarCliente(String, String, int, double) - Saldo exatamente 100000 (limite)
+    void cadastrarClienteParametrizadoSaldoExatamenteLimiteTest() throws Exception {
+        RegistroDeClientes registro = spy(new RegistroDeClientes());
+        when(registro.checarCpf("123")).thenReturn(true);
+
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        campoClientes.set(registro, clientes);
+
+        ContaCorrente conta = mock(ContaCorrente.class);
+        when(banco.abrirNovaConta(1, 100000.0)).thenReturn(conta);
+        when(conta.getSaldo()).thenReturn(100000.0);
+
+        Cliente resultado = registro.cadastrarCliente("Joao", "123", 1, 100000.0);
+
+        assertNotNull(resultado);
+        assertInstanceOf(ClienteWinx.class, resultado);
+        assertEquals("Joao", resultado.getNome());
+        assertEquals("123", resultado.getCpf());
+        verify(banco).abrirNovaConta(1, 100000.0);
+        verify(conta).setExtrato(any(Movimentacao.class));
     }
 }

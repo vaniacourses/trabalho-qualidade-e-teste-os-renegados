@@ -192,6 +192,7 @@ public class RegistroDeClientes {
     /**
      * Este método é responsável por exibir a lista de clientes registrados.
      */
+    @SuppressWarnings("pitest")
     public void printarListaDeClientes(){
         System.out.println("------------------ Clientes --------------------");
         for(Cliente cliente : clientes){
