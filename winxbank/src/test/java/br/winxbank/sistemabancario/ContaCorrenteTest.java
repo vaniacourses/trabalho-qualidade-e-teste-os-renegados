@@ -3,20 +3,14 @@ package br.winxbank.sistemabancario;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 public class ContaCorrenteTest {
 
     private ContaCorrente conta;
     private CartaoCredito cartaoCreditoMock;
     private Cartao cartaoDebitoMock;
-
-    private final InputStream systemIn = System.in;
 
     @BeforeEach
     void setUp() {
@@ -32,17 +26,12 @@ public class ContaCorrenteTest {
         );
     }
 
-    @AfterEach
-    void restoreSystemInput() {
-        System.setIn(systemIn);
-    }
-
     @Test
     void devePagarFaturaCorretamente() {
         conta.pagarFatura(200);
 
-        assertEquals(800, conta.getSaldo());
-        verify(cartaoCreditoMock, times(1)).setFatura(-200);
+        assertEquals(800.0, conta.getSaldo());
+        verify(cartaoCreditoMock).setFatura(-200);
     }
 
     @Test
@@ -60,7 +49,7 @@ public class ContaCorrenteTest {
 
         spyConta.descontarTaxa();
 
-        verify(spyConta, times(1)).movimentacaoBancaria(anyDouble());
+        verify(spyConta).movimentacaoBancaria(anyDouble());
     }
 
     @Test
@@ -75,54 +64,73 @@ public class ContaCorrenteTest {
 
     @Test
     void deveComprarNoDebitoComConfirmacao() {
-        String input = "1\n1\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
 
-        conta.comprar(200);
+        conta.comprar(200, 1, true);
 
-        verify(cartaoDebitoMock, times(1)).debitar(conta, 200);
-        verify(cartaoCreditoMock, never()).creditar(anyDouble());
+        verify(cartaoDebitoMock, times(1))
+                .debitar(conta, 200);
+
+        verify(cartaoCreditoMock, never())
+                .creditar(anyDouble());
     }
 
     @Test
-    void naoDeveComprarNoDebitoSeNaoConfirmar() {
-        String input = "1\n2\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    void naoDeveComprarNoDebitoSemConfirmacao() {
 
-        conta.comprar(200);
+        conta.comprar(200, 1, false);
 
-        verify(cartaoDebitoMock, never()).debitar(any(), anyDouble());
+        verify(cartaoDebitoMock, never())
+                .debitar(any(), anyDouble());
+
+        verify(cartaoCreditoMock, never())
+                .creditar(anyDouble());
     }
 
     @Test
     void deveComprarNoCreditoComConfirmacao() {
-        String input = "2\n1\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
 
-        conta.comprar(300);
+        conta.comprar(300, 2, true);
 
-        verify(cartaoCreditoMock, times(1)).creditar(300);
-        verify(cartaoDebitoMock, never()).debitar(any(), anyDouble());
+        verify(cartaoCreditoMock, times(1))
+                .creditar(300);
+
+        verify(cartaoDebitoMock, never())
+                .debitar(any(), anyDouble());
     }
 
     @Test
-    void naoDeveComprarNoCreditoSeNaoConfirmar() {
-        String input = "2\n2\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    void naoDeveComprarNoCreditoSemConfirmacao() {
 
-        conta.comprar(300);
+        conta.comprar(300, 2, false);
 
-        verify(cartaoCreditoMock, never()).creditar(anyDouble());
+        verify(cartaoCreditoMock, never())
+                .creditar(anyDouble());
+
+        verify(cartaoDebitoMock, never())
+                .debitar(any(), anyDouble());
     }
 
     @Test
-    void naoDeveFazerNadaSeOpcaoInvalida() {
-        String input = "3\n";
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    void naoDeveFazerNadaQuandoFormaPagamentoForInvalida() {
 
-        conta.comprar(100);
+        conta.comprar(100, 99, true);
 
-        verify(cartaoDebitoMock, never()).debitar(any(), anyDouble());
-        verify(cartaoCreditoMock, never()).creditar(anyDouble());
+        verify(cartaoDebitoMock, never())
+                .debitar(any(), anyDouble());
+
+        verify(cartaoCreditoMock, never())
+                .creditar(anyDouble());
+    }
+
+    @Test
+    void naoDeveFazerNadaQuandoFormaPagamentoForInvalidaESemConfirmacao() {
+
+        conta.comprar(100, 99, false);
+
+        verify(cartaoDebitoMock, never())
+                .debitar(any(), anyDouble());
+
+        verify(cartaoCreditoMock, never())
+                .creditar(anyDouble());
     }
 }
