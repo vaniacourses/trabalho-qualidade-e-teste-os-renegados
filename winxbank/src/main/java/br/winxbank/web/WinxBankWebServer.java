@@ -22,40 +22,45 @@ public class WinxBankWebServer {
     public static void main(String[] args) throws IOException {
         int port = porta();
         SERVICE.inicializar();
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/", WinxBankWebServer::index);
-        server.createContext("/acao", WinxBankWebServer::acao);
-        server.createContext("/api/estado", WinxBankWebServer::apiEstado);
-        server.setExecutor(null);
+        HttpServer server = criarServidor(port, SERVICE);
         server.start();
         System.out.println("WinxBank Web iniciado em http://localhost:" + port);
     }
 
-    private static void index(HttpExchange exchange) throws IOException {
+    public static HttpServer criarServidor(int port, WinxBankWebService service) throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        server.createContext("/", exchange -> index(exchange, service));
+        server.createContext("/acao", exchange -> acao(exchange, service));
+        server.createContext("/api/estado", exchange -> apiEstado(exchange, service));
+        server.setExecutor(null);
+        return server;
+    }
+
+    private static void index(HttpExchange exchange, WinxBankWebService service) throws IOException {
         if(!"GET".equalsIgnoreCase(exchange.getRequestMethod())){
             responder(exchange, 405, "text/plain; charset=UTF-8", "Método não permitido");
             return;
         }
-        responder(exchange, 200, "text/html; charset=UTF-8", SERVICE.renderizarPagina());
+        responder(exchange, 200, "text/html; charset=UTF-8", service.renderizarPagina());
     }
 
-    private static void acao(HttpExchange exchange) throws IOException {
+    private static void acao(HttpExchange exchange, WinxBankWebService service) throws IOException {
         if(!"POST".equalsIgnoreCase(exchange.getRequestMethod())){
             responder(exchange, 405, "text/plain; charset=UTF-8", "Método não permitido");
             return;
         }
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         Map<String, String> form = parseForm(body);
-        SERVICE.executar(form.getOrDefault("acao", ""), form);
-        responder(exchange, 200, "text/html; charset=UTF-8", SERVICE.renderizarPagina());
+        service.executar(form.getOrDefault("acao", ""), form);
+        responder(exchange, 200, "text/html; charset=UTF-8", service.renderizarPagina());
     }
 
-    private static void apiEstado(HttpExchange exchange) throws IOException {
+    private static void apiEstado(HttpExchange exchange, WinxBankWebService service) throws IOException {
         if(!"GET".equalsIgnoreCase(exchange.getRequestMethod())){
             responder(exchange, 405, "application/json; charset=UTF-8", "{\"erro\":\"Método não permitido\"}");
             return;
         }
-        responder(exchange, 200, "application/json; charset=UTF-8", SERVICE.estadoJson());
+        responder(exchange, 200, "application/json; charset=UTF-8", service.estadoJson());
     }
 
     private static void responder(HttpExchange exchange, int status, String contentType, String body) throws IOException {

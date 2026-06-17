@@ -83,6 +83,52 @@ class BancoTest {
         }
     }
 
+    @Test
+    void abrirNovaContaWebQuandoTipoEhUmCriaContaCorrenteSemScanner() {
+        try (MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            randomMock.when(RandomNumberGenerator::gerarNumCartao).thenReturn(7777);
+            randomMock.when(RandomNumberGenerator::gerarCsv).thenReturn(321);
+            randomMock.when(RandomNumberGenerator::gerarNumConta).thenReturn(45678);
+
+            Conta conta = Banco.getInstancia().abrirNovaConta(1, 800.0);
+
+            ContaCorrente contaCorrente = assertInstanceOf(ContaCorrente.class, conta);
+            assertEquals(45678, contaCorrente.getNumeroConta());
+            assertEquals(800.0, contaCorrente.getSaldo(), DELTA);
+            assertEquals(7777, contaCorrente.getCartao().getNumero());
+            assertEquals(321, contaCorrente.getCartao().getCsv());
+            assertEquals(7777, contaCorrente.getCartaoCredito().getNumero());
+            assertEquals(321, contaCorrente.getCartaoCredito().getCsv());
+        }
+    }
+
+    @Test
+    void abrirNovaContaWebQuandoTipoEhDoisCriaContaPoupancaSemScanner() {
+        try (MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            randomMock.when(RandomNumberGenerator::gerarNumCartao).thenReturn(8888);
+            randomMock.when(RandomNumberGenerator::gerarCsv).thenReturn(654);
+            randomMock.when(RandomNumberGenerator::gerarNumConta).thenReturn(56789);
+
+            Conta conta = Banco.getInstancia().abrirNovaConta(2, 900.0);
+
+            ContaPoupanca contaPoupanca = assertInstanceOf(ContaPoupanca.class, conta);
+            assertEquals(56789, contaPoupanca.getNumeroConta());
+            assertEquals(900.0, contaPoupanca.getSaldo(), DELTA);
+            assertEquals(8888, contaPoupanca.getCartao().getNumero());
+            assertEquals(654, contaPoupanca.getCartao().getCsv());
+        }
+    }
+
+    @Test
+    void abrirNovaContaWebQuandoTipoEhInvalidoRetornaNullENaoGeraNumeros() {
+        try (MockedStatic<RandomNumberGenerator> randomMock = mockStatic(RandomNumberGenerator.class)) {
+            Conta conta = Banco.getInstancia().abrirNovaConta(0, 100.0);
+
+            assertNull(conta);
+            randomMock.verifyNoInteractions();
+        }
+    }
+
     /**
      * Método responsável por testar a abertura de uma conta poupanca com entradas esperadas.
      */
@@ -234,6 +280,29 @@ class BancoTest {
         }
     }
 
+    @Test
+    void fecharContaWebQuandoContaExisteApagaContaSelecionada() {
+        Cliente cliente = mock(Cliente.class);
+        Conta conta = mock(Conta.class);
+        when(cliente.selecionarConta(33)).thenReturn(conta);
+
+        Banco.getInstancia().fecharConta(cliente, 33);
+
+        verify(cliente).selecionarConta(33);
+        verify(cliente).apagarConta(conta);
+    }
+
+    @Test
+    void fecharContaWebQuandoContaNaoExisteLancaExcecaoENaoApagaConta() {
+        Cliente cliente = mock(Cliente.class);
+        when(cliente.selecionarConta(44)).thenReturn(null);
+
+        assertThrows(BankAccountNotFoundException.class, () -> Banco.getInstancia().fecharConta(cliente, 44));
+
+        verify(cliente).selecionarConta(44);
+        verify(cliente, never()).apagarConta(org.mockito.ArgumentMatchers.any());
+    }
+
     /**
      * Método responsável por testar a movimentação do banco para com uma conta
      *
@@ -243,7 +312,7 @@ class BancoTest {
         Cliente cliente = mock(Cliente.class);
         Conta conta = mock(Conta.class);
         when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(conta)));
-        RegistroDeClientes.getInstancia().getClientes().add(cliente);
+        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
 
         Banco.getInstancia().movimentarEntreBancoConta();
 
@@ -260,7 +329,7 @@ class BancoTest {
         Cliente cliente = mock(Cliente.class);
         ContaPoupanca contaPoupanca = mock(ContaPoupanca.class);
         when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(contaPoupanca)));
-        RegistroDeClientes.getInstancia().getClientes().add(cliente);
+        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
 
         Banco.getInstancia().movimentarEntreBancoConta();
 
@@ -281,7 +350,7 @@ class BancoTest {
         when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(contaCorrente)));
         when(contaCorrente.getCartaoCredito()).thenReturn(cartaoCredito);
         when(cartaoCredito.getFatura()).thenReturn(100.0);
-        RegistroDeClientes.getInstancia().getClientes().add(cliente);
+        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
 
         Banco.getInstancia().movimentarEntreBancoConta();
 
@@ -290,6 +359,37 @@ class BancoTest {
         verify(contaCorrente).descontarTaxa();
         verify(cartaoCredito).getFatura();
         verify(cartaoCredito).cobrarJurus();
+    }
+
+    @Test
+    void movimentarEntreBancoContaQuandoContaCorrenteNaoTemFaturaNaoCobraJurosDaFatura() {
+        Cliente cliente = mock(Cliente.class);
+        ContaCorrente contaCorrente = mock(ContaCorrente.class);
+        CartaoCredito cartaoCredito = mock(CartaoCredito.class);
+        when(cliente.getContas()).thenReturn(new ArrayList<>(List.of(contaCorrente)));
+        when(contaCorrente.getCartaoCredito()).thenReturn(cartaoCredito);
+        when(cartaoCredito.getFatura()).thenReturn(0.0);
+        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
+
+        Banco.getInstancia().movimentarEntreBancoConta();
+
+        verify(contaCorrente).cobrarJurusEmprestimo();
+        verify(contaCorrente).descontarTaxa();
+        verify(cartaoCredito).getFatura();
+        verify(cartaoCredito, never()).cobrarJurus();
+    }
+
+    @Test
+    void movimentarEntreBancoContaQuandoClienteNaoTemContasNaoMovimentaNada() {
+        Cliente cliente = mock(Cliente.class);
+        when(cliente.getContas()).thenReturn(new ArrayList<>());
+        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
+
+        Banco.getInstancia().movimentarEntreBancoConta();
+
+        verify(cliente).getContas();
+        assertEquals(0.0, Banco.getInstancia().getReceitas(), DELTA);
+        assertEquals(0.0, Banco.getInstancia().getDespesas(), DELTA);
     }
 
     /**
