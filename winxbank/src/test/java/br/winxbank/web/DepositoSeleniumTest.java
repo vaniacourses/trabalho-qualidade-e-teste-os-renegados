@@ -93,6 +93,7 @@ public class DepositoSeleniumTest {
             return Double.parseDouble(limpo);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Formato de saldo inválido: " + textoSaldo, e);
+
         }
     }
 }
