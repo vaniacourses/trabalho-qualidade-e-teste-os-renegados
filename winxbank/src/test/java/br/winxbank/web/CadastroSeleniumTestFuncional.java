@@ -1,6 +1,7 @@
 package br.winxbank.web;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -18,6 +19,24 @@ public class CadastroSeleniumTestFuncional {
 
     private WebDriver driver;
     private WebDriverWait wait;
+
+    @BeforeAll
+    static void iniciarServidor() {
+
+        new Thread(() -> {
+            try {
+                WinxBankWebServer.main(new String[]{});
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
     @BeforeEach
     void setupTest() {
