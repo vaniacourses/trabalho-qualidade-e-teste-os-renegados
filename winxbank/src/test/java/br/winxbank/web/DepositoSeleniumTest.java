@@ -1,14 +1,7 @@
 package br.winxbank.web;
 
-import br.winxbank.sistemabancario.Banco;
-import br.winxbank.sistemabancario.Cartao;
-import br.winxbank.sistemabancario.CartaoCredito;
-import br.winxbank.sistemabancario.ContaCorrente;
-import br.winxbank.sistemaclientes.Cliente;
-import br.winxbank.sistemaclientes.RegistroDeClientes;
-import br.winxbank.tempo.Ano;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -20,183 +13,87 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Teste de SISTEMA (E2E) com NAVEGADOR REAL (Selenium) do fluxo de depósito.
- *
- * Reescrito para ser AUTO-SUFICIENTE: semeia o próprio cliente/conta no registro em vez de
- * depender de dados pré-existentes no clientes.json (que variavam conforme a execução e causavam
- * timeout). Também ignora o teste automaticamente quando não há Chrome/ChromeDriver disponível.
- *
- * Observação sobre determinismo: cada requisição faz o mês passar (Ano.fazerMesPassar) e, a cada 5
- * interações, o banco cobra taxa de manutenção da conta corrente. Por isso a asserção verifica que
- * o saldo AUMENTOU após o depósito (e não um valor fixo exato).
- */
 public class DepositoSeleniumTest {
 
-    private static final String CPF_DEPOSITO = "11122233344";
-    private static final int CONTA_DEPOSITO = 80414;
-
-    private final Map<Path, byte[]> arquivosOriginais = new HashMap<>();
     private WebDriver driver;
     private WebDriverWait wait;
 
+
     @BeforeEach
-    void setupTest() throws IOException {
-        // Semeia o estado em arquivo e no registro em memória, garantindo o cliente do teste.
-        preservarArquivo(Path.of("clientes.json"));
-        preservarArquivo(Path.of("mesAtual.txt"));
-        preservarArquivo(Path.of("banco.txt"));
-        Files.writeString(Path.of("clientes.json"), estadoInicialJson(), StandardCharsets.UTF_8);
-        Files.writeString(Path.of("mesAtual.txt"), "Janeiro", StandardCharsets.UTF_8);
-        Files.deleteIfExists(Path.of("banco.txt"));
-        semearRegistro();
-
-        new Thread(() -> {
-            try {
-                WinxBankWebServer.main(new String[]{});
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-        dormir(5000);
-        // Reforça o cliente no registro vivo (o servidor pode já ter sido iniciado por outro teste).
-        semearRegistro();
-
-        System.setProperty("webdriver.chrome.driver", "chromedriver-win64/chromedriver.exe");
+    void setupTest() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         options.addArguments("--disable-gpu");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--remote-allow-origins=*");
         options.addArguments("--window-size=1920,1080");
-        try {
-            driver = new ChromeDriver(options);
-        } catch (Throwable t) {
-            Assumptions.assumeTrue(false,
-                    "Chrome/ChromeDriver indisponível neste ambiente: " + t.getMessage());
-        }
-        wait = new WebDriverWait(driver, 15);
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @AfterEach
-    void teardown() throws IOException {
+    void teardown() {
         if (driver != null) {
             driver.quit();
         }
-        limparEstado();
-        restaurarArquivo(Path.of("clientes.json"));
-        restaurarArquivo(Path.of("mesAtual.txt"));
-        restaurarArquivo(Path.of("banco.txt"));
     }
 
     @Test
-    void testDepositoAumentaSaldo() {
+    void testDepositoAumentaSaldo() throws InterruptedException {
+
         driver.get("http://localhost:8080");
+
 
         if (!driver.findElements(By.id("btn-logout")).isEmpty()) {
             driver.findElement(By.id("btn-logout")).click();
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")));
         }
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin"))).sendKeys(CPF_DEPOSITO);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")))
+                .sendKeys("11111111111");
+
         driver.findElement(By.id("btn-login")).click();
 
+  
         WebElement saldoElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("metric-saldo")));
         double saldoInicial = parseSaldo(saldoElement.getText());
 
+   
         WebElement navDepositar = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("nav-depositar")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", navDepositar);
 
+ 
         WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaDeposito")));
         inputConta.clear();
-        inputConta.sendKeys(String.valueOf(CONTA_DEPOSITO));
+        inputConta.sendKeys("80414");
 
         WebElement inputValor = driver.findElement(By.id("valorDeposito"));
         inputValor.clear();
         inputValor.sendKeys("5000");
 
+
         WebElement btnDepositar = driver.findElement(By.id("btn-depositar"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnDepositar);
+
 
         WebElement novoSaldoElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("metric-saldo")));
         double saldoFinal = parseSaldo(novoSaldoElement.getText());
 
-        // O depósito de 5000 deve elevar o saldo; eventual taxa mensal (13) não anula esse aumento.
-        assertTrue(saldoFinal > saldoInicial,
-                "O saldo deveria aumentar após o depósito (inicial=" + saldoInicial + ", final=" + saldoFinal + ")");
-        assertTrue(saldoFinal >= saldoInicial + 5000.0 - 50.0,
-                "O aumento deveria ser próximo de 5000 (descontada eventual taxa mensal)");
+
+        assertEquals(saldoInicial + 5000.0, saldoFinal, 0.01, "O saldo deveria ter aumentado em 5000");
     }
 
     private double parseSaldo(String textoSaldo) {
         String limpo = textoSaldo.replace("R$ ", "")
                 .replace(".", "")
-                .replace(",", ".")
-                .trim();
+                .replace(",", ".");
         try {
             return Double.parseDouble(limpo);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Formato de saldo inválido: " + textoSaldo, e);
-        }
-    }
 
-    // ==================== infraestrutura / estado ====================
-
-    private void semearRegistro() {
-        Cartao debito = new Cartao(1000, 100);
-        CartaoCredito credito = new CartaoCredito(0.0, 0, false, 1000.0, 1000, 100);
-        ContaCorrente conta = new ContaCorrente(CONTA_DEPOSITO, 1000.0, debito, 0.0, credito);
-        Cliente cliente = new Cliente("CLIENTE DEPOSITO", CPF_DEPOSITO);
-        cliente.setContas(conta);
-        RegistroDeClientes.getInstancia().setClientes(new ArrayList<>(List.of(cliente)));
-    }
-
-    private String estadoInicialJson() {
-        String conta = "{\"cartaoCredito\":{\"fatura\":0.0,\"mesDaFatura\":null,\"indexMesDaFatura\":0,"
-                + "\"faturaPaga\":false,\"limite\":1000.0,\"numero\":1000,\"csv\":100},"
-                + "\"numeroConta\":" + CONTA_DEPOSITO + ",\"saldo\":1000.0,"
-                + "\"cartao\":{\"numero\":1000,\"csv\":100},\"dividaDeEmprestimo\":0.0,"
-                + "\"extrato\":[{\"mesAtual\":\"Janeiro\",\"dinheiroMovimentado\":1000.0,\"tipoDaMovimentacao\":\"ENTRADA\"}]}";
-        return "[{\"nome\":\"CLIENTE DEPOSITO\",\"cpf\":\"" + CPF_DEPOSITO + "\","
-                + "\"contas\":[" + conta + "]}]";
-    }
-
-    private void preservarArquivo(Path path) throws IOException {
-        arquivosOriginais.put(path, Files.exists(path) ? Files.readAllBytes(path) : null);
-    }
-
-    private void restaurarArquivo(Path path) throws IOException {
-        byte[] conteudoOriginal = arquivosOriginais.get(path);
-        if (conteudoOriginal == null) {
-            Files.deleteIfExists(path);
-            return;
-        }
-        Files.write(path, conteudoOriginal);
-    }
-
-    private void limparEstado() {
-        RegistroDeClientes.getInstancia().limparListaDeClientes();
-        Banco.getInstancia().despesas = 0;
-        Banco.getInstancia().receitas = 0;
-        Ano.getInstancia().setMesAtual("Janeiro");
-    }
-
-    private void dormir(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 }
