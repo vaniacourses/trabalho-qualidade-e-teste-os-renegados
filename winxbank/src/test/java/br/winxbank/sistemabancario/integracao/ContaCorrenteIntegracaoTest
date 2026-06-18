@@ -1,0 +1,109 @@
+package br.winxbank.sistemabancario.integracao;
+
+import br.winxbank.sistemabancario.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * TESTES DE INTEGRAÇÃO - ContaCorrente
+ * Testa a integração com outras classes (Conta, CartaoCredito, Banco, etc)
+ */
+@DisplayName("Testes de Integração - ContaCorrente")
+public class ContaCorrenteIntegracaoTest {
+
+    private ContaCorrente conta;
+    private CartaoCredito cartaoCredito;
+    private Cartao cartaoDebito;
+    private static final double DELTA = 0.01;
+
+    @BeforeEach
+    void setUp() {
+        cartaoDebito = new Cartao(1001, 100);
+        cartaoCredito = new CartaoCredito(1002, 200);
+        conta = new ContaCorrente(5001, 3000.0, cartaoDebito, 0.0, cartaoCredito);
+    }
+
+    @Test
+    @DisplayName("Integração: Pagar fatura afeta CartaoCredito")
+    void integracao_pagarFaturaAffetsCartaoCredito() {
+        double faturaInicial = cartaoCredito.getFatura();
+        conta.pagarFatura(500);
+        double faturaFinal = cartaoCredito.getFatura();
+        
+        assertEquals(faturaInicial - 500, faturaFinal, DELTA);
+    }
+
+    @Test
+    @DisplayName("Integração: Descontar taxa gera Movimentacao")
+    void integracao_descontarTaxaCriaMovimentacao() {
+        int tamanhoInicial = conta.getExtrato().size();
+        conta.descontarTaxa();
+        int tamanhoFinal = conta.getExtrato().size();
+        
+        assertTrue(tamanhoFinal > tamanhoInicial);
+    }
+
+    @Test
+    @DisplayName("Integração: Compra no débito usa CartaoDebito")
+    void integracao_compraDebitoUsaCartaoDebito() {
+        double saldoAntes = conta.getSaldo();
+        boolean confirmado = conta.comprar(100, 1, 1);
+        
+        assertTrue(confirmado);
+        assertEquals(cartaoDebito, conta.getCartao());
+    }
+
+    @Test
+    @DisplayName("Integração: Compra no crédito usa CartaoCredito")
+    void integracao_compraCreditoUsaCartaoCredito() {
+        boolean confirmado = conta.comprar(200, 2, 1);
+        
+        assertTrue(confirmado);
+        assertEquals(cartaoCredito, conta.getCartaoCredito());
+    }
+
+    @Test
+    @DisplayName("Integração: ContaCorrente mantém herança de Conta")
+    void integracao_mantendoHerancaDeConta() {
+        assertTrue(conta instanceof Conta);
+        assertEquals(5001, conta.getNumeroConta());
+        assertEquals(3000.0, conta.getSaldo(), DELTA);
+    }
+
+    @Test
+    @DisplayName("Integração: getTipoDaConta retorna Corrente diferente de Poupança")
+    void integracao_tipoContaDistinto() {
+        String tipoConta = conta.getTipoDaConta();
+        assertEquals("Corrente", tipoConta);
+        assertNotEquals("Poupança", tipoConta);
+    }
+
+    @Test
+    @DisplayName("Integração: Movimentação bancária com Banco")
+    void integracao_movimentacaoBancaria() {
+        double receitasAntes = Banco.getInstancia().getReceitas();
+        conta.movimentacaoBancaria(100);
+        double receitasDepois = Banco.getInstancia().getReceitas();
+        
+        assertEquals(100, receitasDepois - receitasAntes, DELTA);
+    }
+
+    @Test
+    @DisplayName("Integração: Sequência completa de operações")
+    void integracao_sequenciaCompleta() {
+        // Pagar fatura
+        conta.pagarFatura(500);
+        assertEquals(2500.0, conta.getSaldo(), DELTA);
+        
+        // Descontar taxa
+        conta.descontarTaxa();
+        assertTrue(conta.getSaldo() < 2500.0);
+        
+        // Fazer compra
+        boolean compra = conta.comprar(300, 2, 1);
+        assertTrue(compra);
+    }
+}

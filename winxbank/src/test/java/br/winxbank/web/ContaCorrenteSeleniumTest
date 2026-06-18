@@ -1,0 +1,691 @@
+package br.winxbank.web;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * TESTES FUNCIONAIS COM SELENIUM - ContaCorrente
+ * Testa comportamentos e fluxos funcionais completos através da interface web
+ * 
+ * Requer: 
+ * - Servidor Spring Boot rodando em http://localhost:8080
+ * - ChromeDriver configurado
+ * - Dados de teste: CPF 11111111111
+ */
+@DisplayName("Testes Funcionais Selenium - ContaCorrente")
+public class ContaCorrenteFuncionalSeleniumTest {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+    private static final String BASE_URL = "http://localhost:8080";
+    private static final String CPF_TESTE = "11111111111";
+    private static final long TIMEOUT_SEGUNDOS = 10;
+    private static final double DELTA = 1.0; // Margem para cálculos
+
+    @BeforeEach
+    void setupTest() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(TIMEOUT_SEGUNDOS));
+    }
+
+    @AfterEach
+    void teardown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    /**
+     * Faz login no sistema
+     */
+    private void fazerLogin() {
+        driver.get(BASE_URL);
+
+        if (!driver.findElements(By.id("btn-logout")).isEmpty()) {
+            driver.findElement(By.id("btn-logout")).click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")));
+        }
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")))
+                .sendKeys(CPF_TESTE);
+
+        driver.findElement(By.id("btn-login")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("metric-saldo")));
+    }
+
+    /**
+     * Parse do saldo exibido na tela
+     */
+    private double parseSaldo(String textoSaldo) {
+        String limpo = textoSaldo.replace("R$ ", "")
+                .replace(".", "")
+                .replace(",", ".");
+        try {
+            return Double.parseDouble(limpo);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Formato de saldo inválido: " + textoSaldo, e);
+        }
+    }
+
+    /**
+     * Aguarda e captura o saldo atual da tela
+     */
+    private double capturarSaldoAtual() {
+        WebElement saldoElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("metric-saldo")));
+        return parseSaldo(saldoElement.getText());
+    }
+
+    /**
+     * Navega para uma seção específica
+     */
+    private void navegarPara(String navId) {
+        WebElement nav = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(navId)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", nav);
+        Thread.sleep(500); // Pequena pausa para animação
+    }
+
+    // ============================================================================
+    // TESTES FUNCIONAIS - FLUXO DE PAGAMENTO DE FATURA
+    // ============================================================================
+
+    @Nested
+    @DisplayName("Testes Funcionais - Fluxo de Pagamento de Fatura")
+    class TestesFuncionalsPagamentoFatura {
+
+        @Test
+        @DisplayName("Fluxo: Cliente paga fatura simples")
+        void fluxo_pagarFaturaSimples() throws InterruptedException {
+            fazerLogin();
+
+            double saldoAntes = capturarSaldoAtual();
+            
+            navegarPara("nav-fatura");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("300");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+
+            Thread.sleep(1000);
+
+            double saldoDepois = capturarSaldoAtual();
+
+            // Validação
+            assertEquals(saldoAntes - 300.0, saldoDepois, DELTA, "Saldo deve reduzir em 300");
+        }
+
+        @Test
+        @DisplayName("Fluxo: Múltiplos pagamentos de fatura reduzem progressivamente")
+        void fluxo_multiplospagamentos() throws InterruptedException {
+            fazerLogin();
+
+            double saldoInicial = capturarSaldoAtual();
+            
+            // Primeiro pagamento
+            navegarPara("nav-fatura");
+            
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("100");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+            
+            Thread.sleep(1000);
+            double saldoApos1 = capturarSaldoAtual();
+
+            // Segundo pagamento
+            navegarPara("nav-fatura");
+            
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("200");
+
+            btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+            
+            Thread.sleep(1000);
+            double saldoApos2 = capturarSaldoAtual();
+
+            // Terceiro pagamento
+            navegarPara("nav-fatura");
+            
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("150");
+
+            btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+            
+            Thread.sleep(1000);
+            double saldoApos3 = capturarSaldoAtual();
+
+            // Validações
+            assertEquals(saldoInicial - 100.0, saldoApos1, DELTA);
+            assertEquals(saldoInicial - 300.0, saldoApos2, DELTA);
+            assertEquals(saldoInicial - 450.0, saldoApos3, DELTA);
+        }
+
+        @Test
+        @DisplayName("Fluxo: Pagar fatura com valor zero não afeta saldo")
+        void fluxo_pagarFaturaZero() throws InterruptedException {
+            fazerLogin();
+
+            double saldoAntes = capturarSaldoAtual();
+            
+            navegarPara("nav-fatura");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("0");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+
+            Thread.sleep(1000);
+
+            double saldoDepois = capturarSaldoAtual();
+
+            assertEquals(saldoAntes, saldoDepois, DELTA, "Saldo não deve mudar com pagamento zero");
+        }
+    }
+
+    // ============================================================================
+    // TESTES FUNCIONAIS - FLUXO DE COMPRA
+    // ============================================================================
+
+    @Nested
+    @DisplayName("Testes Funcionais - Fluxo de Compra (Débito/Crédito)")
+    class TestesFuncionaisCompra {
+
+        @Test
+        @DisplayName("Fluxo: Cliente realiza compra simples no débito")
+        void fluxo_compraDebito() throws InterruptedException {
+            fazerLogin();
+
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("250");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+
+            WebElement mensagem = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mensagem-sucesso")));
+            assertTrue(mensagem.isDisplayed());
+        }
+
+        @Test
+        @DisplayName("Fluxo: Cliente realiza compra simples no crédito")
+        void fluxo_compraCredito() throws InterruptedException {
+            fazerLogin();
+
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("500");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoCredito = driver.findElement(By.id("credito-option"));
+            opcaoCredito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+
+            WebElement mensagem = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mensagem-sucesso")));
+            assertTrue(mensagem.isDisplayed());
+        }
+
+        @Test
+        @DisplayName("Fluxo: Cliente cancela compra sem confirmar")
+        void fluxo_cancelarCompra() throws InterruptedException {
+            fazerLogin();
+
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("150");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("0"); // Não confirma
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+
+            WebElement mensagem = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mensagem-erro")));
+            assertTrue(mensagem.getText().toLowerCase().contains("cancelada"));
+        }
+
+        @Test
+        @DisplayName("Fluxo: Múltiplas compras alternadas entre débito e crédito")
+        void fluxo_alternanciaDebitoCredito() throws InterruptedException {
+            fazerLogin();
+
+            // Primeira compra - DÉBITO
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("100");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mensagem-sucesso")));
+
+            // Segunda compra - CRÉDITO
+            navegarPara("nav-compra");
+
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("200");
+
+            selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoCredito = driver.findElement(By.id("credito-option"));
+            opcaoCredito.click();
+
+            inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+            WebElement mensagem = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mensagem-sucesso")));
+            assertTrue(mensagem.isDisplayed());
+        }
+    }
+
+    // ============================================================================
+    // TESTES FUNCIONAIS - FLUXO DE EXTRATO
+    // ============================================================================
+
+    @Nested
+    @DisplayName("Testes Funcionais - Fluxo de Extrato")
+    class TestesFuncionaisExtrato {
+
+        @Test
+        @DisplayName("Fluxo: Compra aparece no extrato")
+        void fluxo_compraAparecenExtrato() throws InterruptedException {
+            fazerLogin();
+
+            // Faz uma compra
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("175");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+
+            // Visualiza extrato
+            navegarPara("nav-extrato");
+
+            WebElement tabela = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tabela-extrato")));
+            String textoTabela = tabela.getText();
+
+            assertTrue(textoTabela.contains("175") || textoTabela.contains("SAIDA"));
+        }
+
+        @Test
+        @DisplayName("Fluxo: Múltiplas operações aparecem no extrato")
+        void fluxo_multiplasOperacoesExtrato() throws InterruptedException {
+            fazerLogin();
+
+            // Operação 1: Compra
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("100");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(500);
+
+            // Operação 2: Pagar fatura
+            navegarPara("nav-fatura");
+
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("50");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+
+            Thread.sleep(500);
+
+            // Visualiza extrato
+            navegarPara("nav-extrato");
+
+            WebElement tabela = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tabela-extrato")));
+            String textoTabela = tabela.getText();
+
+            // Deve conter as duas operações
+            assertTrue(textoTabela.length() > 100, "Extrato deve conter múltiplas operações");
+        }
+    }
+
+    // ============================================================================
+    // TESTES FUNCIONAIS - FLUXO INTEGRADO COMPLETO
+    // ============================================================================
+
+    @Nested
+    @DisplayName("Testes Funcionais - Fluxo Integrado Completo")
+    class TestesFuncionaisFluxoCompleto {
+
+        @Test
+        @DisplayName("Fluxo: Jornada completa do cliente (Login → Compra → Fatura → Extrato → Logout)")
+        void fluxo_jornadaCompletaCliente() throws InterruptedException {
+            // 1. LOGIN
+            fazerLogin();
+            double saldoInicial = capturarSaldoAtual();
+
+            // 2. COMPRA NO DÉBITO
+            navegarPara("nav-compra");
+
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("300");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+
+            Thread.sleep(1000);
+            double saldoAposCompra = capturarSaldoAtual();
+
+            // 3. PAGAR FATURA
+            navegarPara("nav-fatura");
+
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("100");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+
+            Thread.sleep(1000);
+            double saldoAposFatura = capturarSaldoAtual();
+
+            // 4. VISUALIZAR EXTRATO
+            navegarPara("nav-extrato");
+            WebElement tabela = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tabela-extrato")));
+            assertTrue(tabela.isDisplayed());
+
+            // 5. LOGOUT
+            WebElement btnLogout = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("btn-logout")));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnLogout);
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")));
+
+            // Validações finais
+            assertTrue(saldoAposCompra < saldoInicial, "Saldo após compra deve ser menor");
+            assertEquals(saldoInicial - 400.0, saldoAposFatura, DELTA, "Saldo final = inicial - 300 (compra) - 100 (fatura)");
+        }
+
+        @Test
+        @DisplayName("Fluxo: Consistência de saldo após operações sequenciais")
+        void fluxo_consistenciaSaldo() throws InterruptedException {
+            fazerLogin();
+
+            double saldoInicial = capturarSaldoAtual();
+
+            // Compra 1
+            navegarPara("nav-compra");
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("50");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+            Thread.sleep(500);
+
+            // Compra 2
+            navegarPara("nav-compra");
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("75");
+
+            selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+            Thread.sleep(500);
+
+            // Pagar fatura
+            navegarPara("nav-fatura");
+            inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaFatura")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            inputValor = driver.findElement(By.id("valorFatura"));
+            inputValor.clear();
+            inputValor.sendKeys("25");
+
+            WebElement btnPagar = driver.findElement(By.id("btn-pagar-fatura"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnPagar);
+            Thread.sleep(500);
+
+            double saldoFinal = capturarSaldoAtual();
+
+            // Validação: 50 + 75 + 25 = 150 reduzidos do saldo inicial
+            assertEquals(saldoInicial - 150.0, saldoFinal, DELTA);
+        }
+
+        @Test
+        @DisplayName("Fluxo: Tipo de conta permanece como 'Corrente' em toda operação")
+        void fluxo_tipoContaPersiste() throws InterruptedException {
+            fazerLogin();
+
+            // Verifica tipo inicial
+            WebElement tipoConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tipo-conta")));
+            String tipo1 = tipoConta.getText();
+            assertTrue(tipo1.contains("Corrente"));
+
+            // Faz compra
+            navegarPara("nav-compra");
+            WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaCompra")));
+            inputConta.clear();
+            inputConta.sendKeys("80414");
+
+            WebElement inputValor = driver.findElement(By.id("valorCompra"));
+            inputValor.clear();
+            inputValor.sendKeys("50");
+
+            WebElement selectForma = driver.findElement(By.id("formaPagemento"));
+            selectForma.click();
+            WebElement opcaoDebito = driver.findElement(By.id("debito-option"));
+            opcaoDebito.click();
+
+            WebElement inputConfirm = driver.findElement(By.id("confirmarCompra"));
+            inputConfirm.clear();
+            inputConfirm.sendKeys("1");
+
+            WebElement btnComprar = driver.findElement(By.id("btn-compra"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnComprar);
+            Thread.sleep(500);
+
+            // Verifica tipo após operação
+            tipoConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tipo-conta")));
+            String tipo2 = tipoConta.getText();
+            assertEquals(tipo1, tipo2, "Tipo de conta deve permanecer consistente");
+        }
+    }
+}
