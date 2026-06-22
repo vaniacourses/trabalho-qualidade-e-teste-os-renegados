@@ -65,7 +65,7 @@ public class ContaCorrenteTest {
     @Test
     void deveComprarNoDebitoComConfirmacao() {
 
-        conta.comprar(200, 1, true);
+        conta.comprar(200, 1, 1);
 
         verify(cartaoDebitoMock, times(1))
                 .debitar(conta, 200);
@@ -77,7 +77,7 @@ public class ContaCorrenteTest {
     @Test
     void naoDeveComprarNoDebitoSemConfirmacao() {
 
-        conta.comprar(200, 1, false);
+        conta.comprar(200, 1, 0);
 
         verify(cartaoDebitoMock, never())
                 .debitar(any(), anyDouble());
@@ -89,7 +89,7 @@ public class ContaCorrenteTest {
     @Test
     void deveComprarNoCreditoComConfirmacao() {
 
-        conta.comprar(300, 2, true);
+        conta.comprar(300, 2, 1);
 
         verify(cartaoCreditoMock, times(1))
                 .creditar(300);
@@ -101,7 +101,7 @@ public class ContaCorrenteTest {
     @Test
     void naoDeveComprarNoCreditoSemConfirmacao() {
 
-        conta.comprar(300, 2, false);
+        conta.comprar(300, 2, 0);
 
         verify(cartaoCreditoMock, never())
                 .creditar(anyDouble());
@@ -113,7 +113,7 @@ public class ContaCorrenteTest {
     @Test
     void naoDeveFazerNadaQuandoFormaPagamentoForInvalida() {
 
-        conta.comprar(100, 99, true);
+        conta.comprar(100, 99, 1);
 
         verify(cartaoDebitoMock, never())
                 .debitar(any(), anyDouble());
@@ -125,7 +125,7 @@ public class ContaCorrenteTest {
     @Test
     void naoDeveFazerNadaQuandoFormaPagamentoForInvalidaESemConfirmacao() {
 
-        conta.comprar(100, 99, false);
+        conta.comprar(100, 99, 0);
 
         verify(cartaoDebitoMock, never())
                 .debitar(any(), anyDouble());
