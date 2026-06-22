@@ -143,6 +143,25 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>report-sistemas</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site/jacoco-sistemas</outputDirectory>
+                            <excludes>
+                                <exclude>br/winxbank/web/**</exclude>
+                                <exclude>br/winxbank/repository/**</exclude>
+                                <exclude>br/winxbank/random/**</exclude>
+                                <exclude>br/winxbank/tempo/**</exclude>
+                                <exclude>br/winxbank/geradordedocumentos/**</exclude>
+                                <exclude>br/winxbank/exception/**</exclude>
+                                <exclude>br/winxbank/Main*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>check-banco-branch-coverage</id>
                         <phase>verify</phase>
                         <goals>

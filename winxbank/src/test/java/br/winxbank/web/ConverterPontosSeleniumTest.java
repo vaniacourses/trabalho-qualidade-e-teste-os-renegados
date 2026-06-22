@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -135,6 +136,84 @@ class ConverterPontosSeleniumTest {
                 "Os pontos deveriam estar zerados após a conversão");
     }
 
+    // ==================== Testes de valor de borda — campo numeroContaConverter ====================
+
+    @Test
+    // Valor inválido: conta que não existe no sistema.
+    void contaInexistenteNoNavegadorExibeErroContaNaoEncontrada() {
+        fazerLogin();
+        navegarParaConverterPontos();
+
+        WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaConverter")));
+        inputConta.clear();
+        inputConta.sendKeys("99999");
+
+        WebElement btnConverter = driver.findElement(By.id("btn-converterPontos"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnConverter);
+
+        WebElement corpo = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        wait.until(ExpectedConditions.textToBePresentInElement(corpo, "Conta bancaria nao encontrada."));
+        assertTrue(driver.getPageSource().contains("Conta bancaria nao encontrada."),
+                "Conta inexistente deveria exibir erro no navegador");
+    }
+
+    @Test
+    // Abaixo do limite: número negativo — valor menor que qualquer ID de conta válido.
+    void numeroContaNegativoNoNavegadorExibeErroContaNaoEncontrada() {
+        fazerLogin();
+        navegarParaConverterPontos();
+
+        WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaConverter")));
+        inputConta.clear();
+        inputConta.sendKeys("-1");
+
+        WebElement btnConverter = driver.findElement(By.id("btn-converterPontos"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnConverter);
+
+        WebElement corpo = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        wait.until(ExpectedConditions.textToBePresentInElement(corpo, "Conta bancaria nao encontrada."));
+        assertTrue(driver.getPageSource().contains("Conta bancaria nao encontrada."),
+                "Número negativo deveria exibir erro de conta não encontrada no navegador");
+    }
+
+    @Test
+    // Valor não numérico ("banana"): entrada inválida — verifica que o sistema rejeita sem travar.
+    void textoNaoNumericoNoNavegadorExibeErroDeValidacao() {
+        fazerLogin();
+        navegarParaConverterPontos();
+
+        WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaConverter")));
+        inputConta.clear();
+        inputConta.sendKeys("banana");
+
+        WebElement btnConverter = driver.findElement(By.id("btn-converterPontos"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnConverter);
+
+        WebElement corpo = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        wait.until(ExpectedConditions.textToBePresentInElement(corpo, "numeroContaConverter"));
+        assertFalse(driver.getPageSource().contains("Pontos convertidos em saldo com sucesso."),
+                "Texto não numérico não deveria resultar em conversão bem-sucedida");
+    }
+
+    @Test
+    // Acima do limite: número que ultrapassa Integer.MAX_VALUE — estoura parseInt no servidor.
+    void numeroAcimaDoLimiteNoNavegadorExibeErroDeValidacao() {
+        fazerLogin();
+        navegarParaConverterPontos();
+
+        WebElement inputConta = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaConverter")));
+        inputConta.clear();
+        inputConta.sendKeys("999999999999999");
+
+        WebElement btnConverter = driver.findElement(By.id("btn-converterPontos"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnConverter);
+
+        WebElement corpo = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        wait.until(ExpectedConditions.textToBePresentInElement(corpo, "numeroContaConverter"));
+        assertFalse(driver.getPageSource().contains("Pontos convertidos em saldo com sucesso."),
+                "Número acima do limite não deveria resultar em conversão bem-sucedida");
+    }
+
     // ==================== infraestrutura ====================
 
     private String estadoInicialJson() {
@@ -165,6 +244,23 @@ class ConverterPontosSeleniumTest {
         Banco.getInstancia().despesas = 0;
         Banco.getInstancia().receitas = 0;
         Ano.getInstancia().setMesAtual("Janeiro");
+    }
+
+    private void fazerLogin() {
+        driver.get("http://localhost:8080");
+        if (!driver.findElements(By.id("btn-logout")).isEmpty()) {
+            driver.findElement(By.id("btn-logout")).click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin")));
+        }
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpfLogin"))).sendKeys(CPF_WINX);
+        driver.findElement(By.id("btn-login")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("app-page")));
+    }
+
+    private void navegarParaConverterPontos() {
+        WebElement navConverter = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("nav-converterPontos")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", navConverter);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("numeroContaConverter")));
     }
 
     private void dormir(long ms) {
