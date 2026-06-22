@@ -149,6 +149,77 @@ class ConverterPontosE2ETest {
                 "Deveria carregar os 3 clientes semeados");
     }
 
+    // ==================== Testes de valor de borda — campo numeroContaConverter ====================
+
+    @Test
+    // Valor inválido: conta que não existe (número longe de qualquer conta semeada).
+    // Representa um valor fora do domínio válido.
+    void contaInexistenteRetornaErroContaNaoEncontrada() throws IOException {
+        postLogin(CPF_WINX);
+
+        Resposta resposta = post("/acao", Map.of(
+                "acao", "converterPontos",
+                "numeroContaConverter", "99999"
+        ));
+
+        assertEquals(200, resposta.status);
+        assertTrue(resposta.body.contains("Conta bancaria nao encontrada."),
+                "Conta inexistente deveria retornar erro de conta não encontrada");
+        assertFalse(resposta.body.contains("Pontos convertidos em saldo com sucesso."),
+                "Não deveria converter com conta inexistente");
+    }
+
+    @Test
+    // Abaixo do limite: número negativo — passa o parseInt mas nenhuma conta tem ID negativo.
+    void numeroContaNegativoRetornaErroContaNaoEncontrada() throws IOException {
+        postLogin(CPF_WINX);
+
+        Resposta resposta = post("/acao", Map.of(
+                "acao", "converterPontos",
+                "numeroContaConverter", "-1"
+        ));
+
+        assertEquals(200, resposta.status);
+        assertTrue(resposta.body.contains("Conta bancaria nao encontrada."),
+                "Número negativo deveria retornar erro de conta não encontrada");
+        assertFalse(resposta.body.contains("Pontos convertidos em saldo com sucesso."),
+                "Não deveria converter com número de conta negativo");
+    }
+
+    @Test
+    // Valor não numérico ("banana"): teste de entrada inválida que estoura o parseInt.
+    void campoContaComTextoNaoNumericoRetornaErroDeValidacao() throws IOException {
+        postLogin(CPF_WINX);
+
+        Resposta resposta = post("/acao", Map.of(
+                "acao", "converterPontos",
+                "numeroContaConverter", "banana"
+        ));
+
+        assertEquals(200, resposta.status);
+        assertTrue(resposta.body.contains("numeroContaConverter"),
+                "Texto não numérico deveria retornar erro de validação com o nome do campo");
+        assertFalse(resposta.body.contains("Pontos convertidos em saldo com sucesso."),
+                "Não deveria converter com texto não numérico");
+    }
+
+    @Test
+    // Acima do limite: número maior que Integer.MAX_VALUE estoura o parseInt.
+    void numeroContaAcimaDoLimiteRetornaErroDeValidacao() throws IOException {
+        postLogin(CPF_WINX);
+
+        Resposta resposta = post("/acao", Map.of(
+                "acao", "converterPontos",
+                "numeroContaConverter", "999999999999999"
+        ));
+
+        assertEquals(200, resposta.status);
+        assertTrue(resposta.body.contains("numeroContaConverter"),
+                "Número acima do limite deveria retornar erro de validação com o nome do campo");
+        assertFalse(resposta.body.contains("Pontos convertidos em saldo com sucesso."),
+                "Não deveria converter com número acima do limite");
+    }
+
     // ==================== infraestrutura HTTP / estado ====================
 
     private void login(String cpf) throws IOException {
